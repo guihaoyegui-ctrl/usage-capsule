@@ -1,0 +1,9 @@
+**/build/
+**/.DS_Store
+*.app/
+dist/
+*.log
+.env
+auth.json
+*.key
+*.pem

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>%@ Token 消耗 %@</key>
+	<string>%@ の Token 使用量：%@</string>
+	<key>%@ 天额度</key>
+	<string>%@日間の利用枠</string>
+	<key>%@ 小时额度</key>
+	<string>%@時間の利用枠</string>
+	<key>%@可用 %@；下次重置 %@</key>
+	<string>%@の利用可能量 %@、次のリセット %@</string>
+	<key>%@天 %@时</key>
+	<string>%@日 %@時間</string>
+	<key>5 小时窗口</key>
+	<string>5時間の利用枠</string>
+	<key>5 小时窗口 · 距重置 %@</key>
+	<string>5時間枠 · リセットまで %@</string>
+	<key>7 天合计</key>
+	<string>7日間の合計</string>
+	<key>Codex 未连接</key>
+	<string>Codex に接続されていません</string>
+	<key>Codex 连接已关闭，请重试刷新。</key>
+	<string>Codex との接続が終了しました。再読み込みしてください。</string>
+	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
+	<string>前回のリセットを確認できていません。長押しで同じ申請を確認します。</string>
+	<key>保持在其他窗口上方</key>
+	<string>常に手前に表示</string>
+	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
+	<string>リセット結果が未確認です：%@。再試行では同じ申請を確認します。</string>
+	<key>关闭概览</key>
+	<string>概要を閉じる</string>
+	<key>切回原账号以核实兑换</key>
+	<string>元のアカウントで確認してください</string>
+	<key>刷新用量</key>
+	<string>使用量を更新</string>
+	<key>取消固定</key>
+	<string>固定を解除</string>
+	<key>可用 %@</key>
+	<string>利用可能 %@</string>
+	<key>周额</key>
+	<string>週額</string>
+	<key>固定概览</key>
+	<string>概要を固定</string>
+	<key>实时</key>
+	<string>同期中</string>
+	<key>尚未同步</key>
+	<string>未同期</string>
+	<key>已用 %@</key>
+	<string>使用済み %@</string>
+	<key>已知数据合计</key>
+	<string>取得済みデータの合計</string>
+	<key>常驻 184 × 60 pt · 3× 展示</key>
+	<string>184 × 60 pt · 3倍表示</string>
+	<key>常驻尺寸</key>
+	<string>ウィジェットのサイズ</string>
+	<key>当前没有可重置的额度窗口</key>
+	<string>リセットできる利用枠がありません</string>
+	<key>待查询</key>
+	<string>確認中</string>
+	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
+	<string>どこでもドラッグして移動できます。ホバーで表示、クリックで固定。× または Escape で閉じ、右クリックかメニューバーから終了します。毎分更新。</string>
+	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
+	<string>どこでもドラッグ · ホバーで表示 · クリックで固定 · 右クリックで終了</string>
+	<key>日用量暂无法读取：%@</key>
+	<string>日別使用量を取得できません：%@</string>
+	<key>日额</key>
+	<string>5時間</string>
+	<key>日额 %@%%</key>
+	<string>5時間 %@%%</string>
+	<key>日额 %@，周额 %@</key>
+	<string>5時間 %@、週額 %@</string>
+	<key>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</key>
+	<string>5時間枠 · どこでもドラッグ · クリックで固定 · 右クリックで終了</string>
+	<key>显示胶囊</key>
+	<string>カプセルを表示</string>
+	<key>暂不可用</key>
+	<string>利用不可</string>
+	<key>暂无卡片</key>
+	<string>カードなし</string>
+	<key>暂无数据</key>
+	<string>データなし</string>
+	<key>暂无时间</key>
+	<string>時刻未取得</string>
+	<key>暂无有效重置卡</key>
+	<string>有効なリセットカードがありません</string>
+	<key>暂无法核实兑换账号：%@</key>
+	<string>リセット用アカウントを確認できません：%@</string>
+	<key>暂无法确认兑换账号</key>
+	<string>アカウント未確認</string>
+	<key>暂无重置卡</key>
+	<string>リセットカードなし</string>
+	<key>更新中…</key>
+	<string>更新中…</string>
+	<key>更新于 %@</key>
+	<string>更新 %@</string>
+	<key>更新失败，显示上次数据</key>
+	<string>更新失敗・前回のデータを表示</string>
+	<key>服务未返回数据</key>
+	<string>サービスからデータが返されませんでした</string>
+	<key>服务请求失败</key>
+	<string>サービスへのリクエストが失敗しました</string>
+	<key>未找到 Codex，请先安装或打开 Codex 桌面应用。</key>
+	<string>Codex が見つかりません。先に Codex デスクトップアプリをインストールするか開いてください。</string>
+	<key>本周额度</key>
+	<string>今週の利用枠</string>
+	<key>查看 / 固定概览</key>
+	<string>概要を表示・固定</string>
+	<key>概览</key>
+	<string>概要</string>
+	<key>正在核实…</key>
+	<string>確認中…</string>
+	<key>演示模式</key>
+	<string>デモモード</string>
+	<key>用量概览</key>
+	<string>使用量の概要</string>
+	<key>用量胶囊</key>
+	<string>使用量カプセル</string>
+	<key>用量胶囊 · 日额 %@ · 周额 %@</key>
+	<string>使用量カプセル · 5時間 %@ · 週額 %@</string>
+	<key>用量胶囊设置</key>
+	<string>使用量カプセルの設定</string>
+	<key>界面语言</key>
+	<string>表示言語</string>
+	<key>登录</key>
+	<string>ログイン</string>
+	<key>登录 Codex</key>
+	<string>Codex にログイン</string>
+	<key>示例数据</key>
+	<string>サンプルデータ</string>
+	<key>立即刷新</key>
+	<string>今すぐ更新</string>
+	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
+	<string>結果が未確認です。更新して確認してください。再試行では同じ申請を使用します。</string>
+	<key>设置</key>
+	<string>設定</string>
+	<key>请在浏览器完成登录，然后刷新</key>
+	<string>ブラウザでログインしてから更新してください</string>
+	<key>请求超时，请检查网络后刷新。</key>
+	<string>リクエストがタイムアウトしました。接続を確認して更新してください。</string>
+	<key>账号或可用卡已变化，请核实后再长按。</key>
+	<string>アカウントまたはカードが変更されました。確認してから再度長押ししてください。</string>
+	<key>跟随系统</key>
+	<string>システム設定</string>
+	<key>近 7 天 Token</key>
+	<string>直近7日間の Token</string>
+	<key>连接已断开</key>
+	<string>接続が切断されました</string>
+	<key>退出用量胶囊</key>
+	<string>使用量カプセルを終了</string>
+	<key>重置 %@</key>
+	<string>リセット %@</string>
+	<key>重置卡 %@</key>
+	<string>リセットカード %@</string>
+	<key>重置卡仅在长按按钮后兑换。程序使用本机 Codex 登录，不需要 API Key。</key>
+	<string>カードはボタンを長押しした場合にのみ使用します。ローカルの Codex ログインを使用し、API キーは不要です。</string>
+	<key>重置已完成，正在核实额度</key>
+	<string>リセット完了・利用枠を確認中</string>
+	<key>长按 0.8 秒使用</key>
+	<string>0.8秒長押しで使用</string>
+	<key>长按 0.8 秒使用一张重置卡</key>
+	<string>0.8秒長押ししてカードを1枚使用</string>
+	<key>长按使用</key>
+	<string>長押しで使用</string>
+	<key>长按核实</key>
+	<string>長押しで確認</string>
+	<key>长按核实上次兑换</key>
+	<string>長押しで前回のリセットを確認</string>
+	<key>隐藏胶囊</key>
+	<string>カプセルを隠す</string>
+	<key>额度窗口</key>
+	<string>利用枠</string>
+</dict>
+</plist>

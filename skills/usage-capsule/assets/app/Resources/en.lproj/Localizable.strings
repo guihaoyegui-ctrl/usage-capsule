@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>%@ Token 消耗 %@</key>
+	<string>%@ token usage: %@</string>
+	<key>%@ 天额度</key>
+	<string>%@-day quota</string>
+	<key>%@ 小时额度</key>
+	<string>%@-hour quota</string>
+	<key>%@可用 %@；下次重置 %@</key>
+	<string>%@ available: %@; resets %@</string>
+	<key>%@天 %@时</key>
+	<string>%@d %@h</string>
+	<key>5 小时窗口</key>
+	<string>5-hour window</string>
+	<key>5 小时窗口 · 距重置 %@</key>
+	<string>5-hour window · Resets in %@</string>
+	<key>7 天合计</key>
+	<string>7-day total</string>
+	<key>Codex 未连接</key>
+	<string>Codex is not connected</string>
+	<key>Codex 连接已关闭，请重试刷新。</key>
+	<string>Codex disconnected. Refresh to reconnect.</string>
+	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
+	<string>The previous reset is unconfirmed. Hold to verify the same request.</string>
+	<key>保持在其他窗口上方</key>
+	<string>Keep above other windows</string>
+	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
+	<string>Reset unconfirmed: %@. Retrying verifies the same request.</string>
+	<key>关闭概览</key>
+	<string>Close overview</string>
+	<key>切回原账号以核实兑换</key>
+	<string>Switch to the original account to verify</string>
+	<key>刷新用量</key>
+	<string>Refresh usage</string>
+	<key>取消固定</key>
+	<string>Unpin overview</string>
+	<key>可用 %@</key>
+	<string>Available %@</string>
+	<key>周额</key>
+	<string>Week</string>
+	<key>固定概览</key>
+	<string>Pin overview</string>
+	<key>实时</key>
+	<string>Live</string>
+	<key>尚未同步</key>
+	<string>Not synced</string>
+	<key>已用 %@</key>
+	<string>Used %@</string>
+	<key>已知数据合计</key>
+	<string>Known usage total</string>
+	<key>常驻 184 × 60 pt · 3× 展示</key>
+	<string>184 × 60 pt · 3× preview</string>
+	<key>常驻尺寸</key>
+	<string>Widget size</string>
+	<key>当前没有可重置的额度窗口</key>
+	<string>No eligible quota window to reset</string>
+	<key>待查询</key>
+	<string>Pending</string>
+	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
+	<string>Drag anywhere to move. Hover to preview; click to pin. Close with × or Escape. Right-click or use the menu bar to quit. Usage refreshes every minute.</string>
+	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
+	<string>Drag anywhere · Hover to preview · Click to pin · Right-click to quit</string>
+	<key>日用量暂无法读取：%@</key>
+	<string>Daily usage is unavailable: %@</string>
+	<key>日额</key>
+	<string>5H</string>
+	<key>日额 %@%%</key>
+	<string>5H %@%%</string>
+	<key>日额 %@，周额 %@</key>
+	<string>5-hour %@, weekly %@</string>
+	<key>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</key>
+	<string>5-hour quota · Drag anywhere · Click to pin · Right-click to quit</string>
+	<key>显示胶囊</key>
+	<string>Show capsule</string>
+	<key>暂不可用</key>
+	<string>Unavailable</string>
+	<key>暂无卡片</key>
+	<string>No cards</string>
+	<key>暂无数据</key>
+	<string>No data</string>
+	<key>暂无时间</key>
+	<string>Time unavailable</string>
+	<key>暂无有效重置卡</key>
+	<string>No valid reset cards</string>
+	<key>暂无法核实兑换账号：%@</key>
+	<string>Cannot verify the reset account: %@</string>
+	<key>暂无法确认兑换账号</key>
+	<string>Account not verified</string>
+	<key>暂无重置卡</key>
+	<string>No reset cards</string>
+	<key>更新中…</key>
+	<string>Refreshing…</string>
+	<key>更新于 %@</key>
+	<string>Updated %@</string>
+	<key>更新失败，显示上次数据</key>
+	<string>Refresh failed; showing last data</string>
+	<key>服务未返回数据</key>
+	<string>The service returned no data</string>
+	<key>服务请求失败</key>
+	<string>Service request failed</string>
+	<key>未找到 Codex，请先安装或打开 Codex 桌面应用。</key>
+	<string>Codex was not found. Install or open the Codex desktop app first.</string>
+	<key>本周额度</key>
+	<string>Weekly quota</string>
+	<key>查看 / 固定概览</key>
+	<string>Show / pin overview</string>
+	<key>概览</key>
+	<string>Overview</string>
+	<key>正在核实…</key>
+	<string>Verifying…</string>
+	<key>演示模式</key>
+	<string>Demo mode</string>
+	<key>用量概览</key>
+	<string>Usage overview</string>
+	<key>用量胶囊</key>
+	<string>Usage Capsule</string>
+	<key>用量胶囊 · 日额 %@ · 周额 %@</key>
+	<string>Usage Capsule · 5H %@ · Week %@</string>
+	<key>用量胶囊设置</key>
+	<string>Usage Capsule settings</string>
+	<key>界面语言</key>
+	<string>Language</string>
+	<key>登录</key>
+	<string>Sign in</string>
+	<key>登录 Codex</key>
+	<string>Sign in to Codex</string>
+	<key>示例数据</key>
+	<string>Demo data</string>
+	<key>立即刷新</key>
+	<string>Refresh now</string>
+	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
+	<string>The result is uncertain. Refresh to verify; retrying reuses this request.</string>
+	<key>设置</key>
+	<string>Settings</string>
+	<key>请在浏览器完成登录，然后刷新</key>
+	<string>Complete sign-in in the browser, then refresh</string>
+	<key>请求超时，请检查网络后刷新。</key>
+	<string>The request timed out. Check your connection and refresh.</string>
+	<key>账号或可用卡已变化，请核实后再长按。</key>
+	<string>The account or cards changed. Verify before holding again.</string>
+	<key>跟随系统</key>
+	<string>System default</string>
+	<key>近 7 天 Token</key>
+	<string>Tokens · Last 7 days</string>
+	<key>连接已断开</key>
+	<string>Disconnected</string>
+	<key>退出用量胶囊</key>
+	<string>Quit Usage Capsule</string>
+	<key>重置 %@</key>
+	<string>Resets %@</string>
+	<key>重置卡 %@</key>
+	<string>Reset cards %@</string>
+	<key>重置卡仅在长按按钮后兑换。程序使用本机 Codex 登录，不需要 API Key。</key>
+	<string>Reset cards are used only after holding the button. Uses your local Codex sign-in; no API key is needed.</string>
+	<key>重置已完成，正在核实额度</key>
+	<string>Reset completed; verifying quota</string>
+	<key>长按 0.8 秒使用</key>
+	<string>Hold 0.8 s to use</string>
+	<key>长按 0.8 秒使用一张重置卡</key>
+	<string>Hold for 0.8 seconds to use one reset card</string>
+	<key>长按使用</key>
+	<string>Hold to use</string>
+	<key>长按核实</key>
+	<string>Hold to verify</string>
+	<key>长按核实上次兑换</key>
+	<string>Hold to verify the previous reset</string>
+	<key>隐藏胶囊</key>
+	<string>Hide capsule</string>
+	<key>额度窗口</key>
+	<string>Quota window</string>
+</dict>
+</plist>

@@ -1,0 +1,17 @@
+name: Validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Logic and translations
+        run: zsh skills/usage-capsule/assets/app/test.sh
+      - name: Build Apple Silicon app
+        run: zsh skills/usage-capsule/assets/app/build.sh
+      - name: Verify bundle
+        run: |
+          codesign --verify --deep --strict 'skills/usage-capsule/assets/app/build/Usage Capsule.app'
+          plutil -lint 'skills/usage-capsule/assets/app/build/Usage Capsule.app/Contents/Info.plist'

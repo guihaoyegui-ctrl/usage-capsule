@@ -1,0 +1,4 @@
+interface:
+  display_name: "Usage Capsule"
+  short_description: "Install and manage the native Codex quota capsule on macOS"
+  default_prompt: "Use $usage-capsule to install and start the desktop usage widget on my Mac."

@@ -1,0 +1,23 @@
+# Data flow and privacy
+
+Usage Capsule is a local desktop app. It has no developer-operated backend, telemetry, advertising, or crash-upload service.
+
+## Live mode
+
+The app launches the user's installed Codex CLI as an app-server over local standard input/output. It initializes that connection and reads account rate limits and daily usage. The Codex CLI handles its existing authentication and communicates with OpenAI as needed. The widget itself does not ask for an API key or copy login credentials.
+
+Automatic refresh runs once per minute. It calls account-reading methods rather than a model generation turn; it does not send prompts or start conversations. Normal Codex conversations used to install or modify this project have their own model usage.
+
+Quota percentages, reset timestamps, daily totals, and reset-card counts are held in app memory for display. Local preferences store window placement, scale, language, the CLI path, and display options. A local pending-redemption ledger retains the account/card identity and idempotency key needed to reconcile an uncertain reset request. These values are not uploaded by this project. They should not be included in bug reports.
+
+## Reset cards
+
+A card can be consumed only through a deliberate 0.8-second hold in the live app when eligibility permits. The request goes through the existing Codex CLI. Account checks and persistent idempotency prevent a retry from consuming a different card. Do not test this action on a real account just to verify installation.
+
+## Preview and diagnostics
+
+`--demo`, `--render-preview`, and `--render-motion` use sample data and do not query the account. Screenshots in this repository are examples.
+
+The developer-only `--smoke` diagnostic does read live usage and writes a local report. It is not part of the installation helper. Do not run or publish that report without reviewing its contents.
+
+`doctor` reports the platform, compiler, local CLI path, and installation destination. `status` reports only the app installed at the helper's configured path. These outputs can contain local filesystem paths; redact those before sharing publicly.
