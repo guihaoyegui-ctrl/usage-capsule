@@ -39,11 +39,11 @@ struct ServiceError: LocalizedError {
         stdout.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let bytes = handle.availableData
             if bytes.isEmpty { handle.readabilityHandler = nil; return }
-            Task { @MainActor in self?.receive(bytes) }
+            Task { @MainActor [weak self] in self?.receive(bytes) }
         }
         stderr.fileHandleForReading.readabilityHandler = { handle in if handle.availableData.isEmpty { handle.readabilityHandler = nil } }
         p.terminationHandler = { [weak self] child in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard self?.process === child else { return }
                 self?.failAll(ServiceError(message: L10n.text("Codex 连接已关闭，请重试刷新。"))); self?.initialized = false
             }
@@ -139,7 +139,7 @@ struct ServiceError: LocalizedError {
             if method == "account/login/completed" || method == "account/rateLimits/updated" { Task { await self?.refresh() } }
         }
         Task { await refresh() }
-        timer = Timer.scheduledTimer(withTimeInterval:60,repeats:true) { [weak self] _ in Task { @MainActor in await self?.refresh() } }
+        timer = Timer.scheduledTimer(withTimeInterval:60,repeats:true) { [weak self] _ in Task { @MainActor [weak self] in await self?.refresh() } }
     }
     func stop() { timer?.invalidate(); connection.disconnect() }
     func refresh() async {
