@@ -34,6 +34,8 @@
 	<string>元のアカウントで確認してください</string>
 	<key>刷新用量</key>
 	<string>使用量を更新</string>
+	<key>取消</key>
+	<string>キャンセル</string>
 	<key>取消固定</key>
 	<string>固定を解除</string>
 	<key>可用 %@</key>
@@ -44,8 +46,12 @@
 	<string>概要を固定</string>
 	<key>实时</key>
 	<string>同期中</string>
+	<key>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</key>
+	<string>前回のリセット要求を確認します。まだ実行されていない場合、カードを1枚消費することがあります。</string>
 	<key>尚未同步</key>
 	<string>未同期</string>
+	<key>已取消，未提交重置请求。</key>
+	<string>キャンセルしました。リセット要求は送信されていません。</string>
 	<key>已用 %@</key>
 	<string>使用済み %@</string>
 	<key>已知数据合计</key>
@@ -54,10 +60,14 @@
 	<string>184 × 60 pt · 3倍表示</string>
 	<key>常驻尺寸</key>
 	<string>ウィジェットのサイズ</string>
+	<key>当前可用：%@ 张</key>
+	<string>利用可能なカード：%@ 枚</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>リセットできる利用枠がありません</string>
 	<key>待查询</key>
 	<string>確認中</string>
+	<key>打开重置确认，确认后才会使用重置卡</key>
+	<string>リセットの確認を開きます。明示的に確認するまでカードは使用しません。</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>どこでもドラッグして移動できます。ホバーで表示、クリックで固定。× または Escape で閉じ、右クリックかメニューバーから終了します。毎分更新。</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
@@ -110,6 +120,8 @@
 	<string>概要</string>
 	<key>正在核实…</key>
 	<string>確認中…</string>
+	<key>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</key>
+	<string>現在の Codex アカウントにリセットを要求します。成功するとカードを1枚消費し、取り消しはできません。</string>
 	<key>演示模式</key>
 	<string>デモモード</string>
 	<key>用量概览</key>
@@ -126,6 +138,14 @@
 	<string>ログイン</string>
 	<key>登录 Codex</key>
 	<string>Codex にログイン</string>
+	<key>确认使用</key>
+	<string>カードを1枚使用</string>
+	<key>确认使用重置卡？</key>
+	<string>リセットカードを使用しますか？</string>
+	<key>确认核实</key>
+	<string>要求を確認</string>
+	<key>确认核实上次重置？</key>
+	<string>前回のリセットを確認しますか？</string>
 	<key>示例数据</key>
 	<string>サンプルデータ</string>
 	<key>立即刷新</key>
@@ -140,6 +160,8 @@
 	<string>リクエストがタイムアウトしました。接続を確認して更新してください。</string>
 	<key>账号或可用卡已变化，请核实后再长按。</key>
 	<string>アカウントまたはカードが変更されました。確認してから再度長押ししてください。</string>
+	<key>账号或可用卡已变化，请重新确认。</key>
+	<string>アカウントまたは利用可能なカードが変更されました。もう一度確認してください。</string>
 	<key>跟随系统</key>
 	<string>システム設定</string>
 	<key>近 7 天 Token</key>
@@ -160,12 +182,18 @@
 	<string>0.8秒長押しで使用</string>
 	<key>长按 0.8 秒使用一张重置卡</key>
 	<string>0.8秒長押ししてカードを1枚使用</string>
+	<key>长按 0.8 秒打开确认</key>
+	<string>0.8秒長押しして確認</string>
 	<key>长按使用</key>
 	<string>長押しで使用</string>
+	<key>长按打开上次重置的确认</key>
+	<string>長押しで前回のリセットを確認</string>
 	<key>长按核实</key>
 	<string>長押しで確認</string>
 	<key>长按核实上次兑换</key>
 	<string>長押しで前回のリセットを確認</string>
+	<key>长按确认</key>
+	<string>長押しで確認</string>
 	<key>隐藏胶囊</key>
 	<string>カプセルを隠す</string>
 	<key>额度窗口</key>

@@ -234,7 +234,7 @@ struct OverviewView: View {
         if store.redeeming { return L10n.text("正在核实…") }
         if store.pendingRedemption { return L10n.text("长按核实") }
         if !store.canRedeem { return store.resetCount == 0 ? L10n.text("暂无卡片") : L10n.text("暂不可用") }
-        return L10n.text("长按使用")
+        return L10n.text("长按确认")
     }
     private var footer:some View {
         HStack(spacing:4) {
@@ -275,7 +275,7 @@ struct HoldToReset: View {
             guard enabled else { progress=0; return }
             withAnimation(down ? .linear(duration:0.8) : .easeOut(duration:0.1)) { progress=down ? 1 : 0 }
         })
-        .accessibilityLabel(label).accessibilityHint(L10n.text("长按 0.8 秒使用一张重置卡"))
+        .accessibilityLabel(label).accessibilityHint(L10n.text("打开重置确认，确认后才会使用重置卡"))
         .accessibilityAction { if enabled { action() } }
     }
 }

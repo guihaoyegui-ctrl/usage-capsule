@@ -31,7 +31,7 @@ Drag any point in the capsule frame at least four points; small pointer jitter r
 
 ## A reset request is uncertain
 
-Allow the app to reconcile the stored idempotency key. Do not remove the ledger or repeatedly try different cards. Account eligibility and the server's response determine whether a card can be used. Demo and preview modes never consume cards.
+Open the confirmation dialog and review the previous request before choosing to reconcile it. If the original request has not run yet, reconciliation may still consume one card. The app reuses the stored idempotency key. Do not remove the ledger or repeatedly try different cards. Account eligibility and the server's response determine whether a card can be used. Demo and preview modes never consume cards.
 
 ## Reporting an issue
 

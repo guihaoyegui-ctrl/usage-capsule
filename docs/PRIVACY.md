@@ -12,7 +12,7 @@ Quota percentages, reset timestamps, daily totals, and reset-card counts are hel
 
 ## Reset cards
 
-A card can be consumed only through a deliberate 0.8-second hold in the live app when eligibility permits. The request goes through the existing Codex CLI. Account checks and persistent idempotency prevent a retry from consuming a different card. Do not test this action on a real account just to verify installation.
+A 0.8-second hold or accessibility activation only opens a confirmation dialog. A card can be consumed only after the customer explicitly chooses the confirmation button. Cancel, closing, and Escape submit nothing; Return defaults to Cancel. The app checks the account and card again after confirmation, and stops if the displayed state has changed. Reconciliation also needs fresh customer confirmation and explains that an unfinished original request may still consume a card. The request goes through the existing Codex CLI. Account checks and persistent idempotency prevent a retry from consuming a different card. Do not test this action on a real account just to verify installation.
 
 ## Preview and diagnostics
 

@@ -34,6 +34,8 @@
 	<string>원래 계정으로 전환하여 확인</string>
 	<key>刷新用量</key>
 	<string>사용량 새로 고침</string>
+	<key>取消</key>
+	<string>취소</string>
 	<key>取消固定</key>
 	<string>개요 고정 해제</string>
 	<key>可用 %@</key>
@@ -44,8 +46,12 @@
 	<string>개요 고정</string>
 	<key>实时</key>
 	<string>실시간</string>
+	<key>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</key>
+	<string>이전 초기화 요청을 다시 확인합니다. 아직 실행되지 않았다면 초기화 카드 1장이 소비될 수 있습니다.</string>
 	<key>尚未同步</key>
 	<string>동기화 전</string>
+	<key>已取消，未提交重置请求。</key>
+	<string>취소되었습니다. 초기화 요청을 보내지 않았습니다.</string>
 	<key>已用 %@</key>
 	<string>사용 %@</string>
 	<key>已知数据合计</key>
@@ -54,10 +60,14 @@
 	<string>184 × 60 pt · 3배 미리보기</string>
 	<key>常驻尺寸</key>
 	<string>위젯 크기</string>
+	<key>当前可用：%@ 张</key>
+	<string>사용 가능한 카드: %@장</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>초기화할 수 있는 사용 구간이 없습니다</string>
 	<key>待查询</key>
 	<string>확인 대기</string>
+	<key>打开重置确认，确认后才会使用重置卡</key>
+	<string>초기화 확인 창을 엽니다. 명시적으로 확인한 후에만 카드를 사용합니다.</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>아무 곳이나 끌어 이동하세요. 마우스를 올려 미리 보고 클릭하여 고정합니다. × 또는 Escape로 닫고 우클릭이나 메뉴 막대에서 종료합니다. 1분마다 갱신됩니다.</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
@@ -110,6 +120,8 @@
 	<string>개요</string>
 	<key>正在核实…</key>
 	<string>확인 중…</string>
+	<key>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</key>
+	<string>현재 Codex 계정에 초기화를 요청합니다. 성공하면 카드 1장이 소비되며 되돌릴 수 없습니다.</string>
 	<key>演示模式</key>
 	<string>데모 모드</string>
 	<key>用量概览</key>
@@ -126,6 +138,14 @@
 	<string>로그인</string>
 	<key>登录 Codex</key>
 	<string>Codex 로그인</string>
+	<key>确认使用</key>
+	<string>카드 1장 사용</string>
+	<key>确认使用重置卡？</key>
+	<string>초기화 카드를 사용하시겠습니까?</string>
+	<key>确认核实</key>
+	<string>요청 확인</string>
+	<key>确认核实上次重置？</key>
+	<string>이전 초기화를 확인하시겠습니까?</string>
 	<key>示例数据</key>
 	<string>예시 데이터</string>
 	<key>立即刷新</key>
@@ -140,6 +160,8 @@
 	<string>요청 시간이 초과되었습니다. 연결을 확인한 후 새로 고침하세요.</string>
 	<key>账号或可用卡已变化，请核实后再长按。</key>
 	<string>계정 또는 카드가 변경되었습니다. 확인한 후 다시 길게 누르세요.</string>
+	<key>账号或可用卡已变化，请重新确认。</key>
+	<string>계정 또는 사용 가능한 카드가 변경되었습니다. 다시 확인해 주세요.</string>
 	<key>跟随系统</key>
 	<string>시스템 기본값</string>
 	<key>近 7 天 Token</key>
@@ -160,12 +182,18 @@
 	<string>0.8초간 눌러 사용</string>
 	<key>长按 0.8 秒使用一张重置卡</key>
 	<string>0.8초간 길게 눌러 초기화 카드 1장 사용</string>
+	<key>长按 0.8 秒打开确认</key>
+	<string>0.8초 길게 눌러 확인</string>
 	<key>长按使用</key>
 	<string>길게 눌러 사용</string>
+	<key>长按打开上次重置的确认</key>
+	<string>길게 눌러 이전 초기화 확인</string>
 	<key>长按核实</key>
 	<string>길게 눌러 확인</string>
 	<key>长按核实上次兑换</key>
 	<string>길게 눌러 이전 초기화 확인</string>
+	<key>长按确认</key>
+	<string>길게 눌러 확인</string>
 	<key>隐藏胶囊</key>
 	<string>캡슐 숨기기</string>
 	<key>额度窗口</key>

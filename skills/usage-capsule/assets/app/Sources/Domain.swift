@@ -123,6 +123,12 @@ func compactTokens(_ value: Int64?) -> String {
     return String(value)
 }
 struct RedemptionAttempt: Codable { let key: String; let creditID: String?; let accountID:String? }
+struct ResetConfirmation: Equatable {
+    let accountID: String
+    let creditID: String?
+    let pendingKey: String?
+    let availableCount: Int?
+}
 final class RedemptionLedger {
     private let defaults: UserDefaults
     private let storageKey = "unresolvedRedemption.v1"

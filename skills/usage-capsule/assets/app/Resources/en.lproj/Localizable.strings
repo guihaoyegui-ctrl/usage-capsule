@@ -34,6 +34,8 @@
 	<string>Switch to the original account to verify</string>
 	<key>刷新用量</key>
 	<string>Refresh usage</string>
+	<key>取消</key>
+	<string>Cancel</string>
 	<key>取消固定</key>
 	<string>Unpin overview</string>
 	<key>可用 %@</key>
@@ -44,8 +46,12 @@
 	<string>Pin overview</string>
 	<key>实时</key>
 	<string>Live</string>
+	<key>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</key>
+	<string>This continues the previous reset request. If it has not run yet, it may still consume one reset card.</string>
 	<key>尚未同步</key>
 	<string>Not synced</string>
+	<key>已取消，未提交重置请求。</key>
+	<string>Cancelled. No reset request was submitted.</string>
 	<key>已用 %@</key>
 	<string>Used %@</string>
 	<key>已知数据合计</key>
@@ -54,10 +60,14 @@
 	<string>184 × 60 pt · 3× preview</string>
 	<key>常驻尺寸</key>
 	<string>Widget size</string>
+	<key>当前可用：%@ 张</key>
+	<string>Cards available: %@</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>No eligible quota window to reset</string>
 	<key>待查询</key>
 	<string>Pending</string>
+	<key>打开重置确认，确认后才会使用重置卡</key>
+	<string>Opens reset confirmation. A card is used only after you explicitly confirm.</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>Drag anywhere to move. Hover to preview; click to pin. Close with × or Escape. Right-click or use the menu bar to quit. Usage refreshes every minute.</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
@@ -110,6 +120,8 @@
 	<string>Overview</string>
 	<key>正在核实…</key>
 	<string>Verifying…</string>
+	<key>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</key>
+	<string>This submits a reset request for the current Codex account. A successful reset consumes one card and cannot be undone.</string>
 	<key>演示模式</key>
 	<string>Demo mode</string>
 	<key>用量概览</key>
@@ -126,6 +138,14 @@
 	<string>Sign in</string>
 	<key>登录 Codex</key>
 	<string>Sign in to Codex</string>
+	<key>确认使用</key>
+	<string>Use one card</string>
+	<key>确认使用重置卡？</key>
+	<string>Use a reset card?</string>
+	<key>确认核实</key>
+	<string>Reconcile request</string>
+	<key>确认核实上次重置？</key>
+	<string>Reconcile the previous reset?</string>
 	<key>示例数据</key>
 	<string>Demo data</string>
 	<key>立即刷新</key>
@@ -140,6 +160,8 @@
 	<string>The request timed out. Check your connection and refresh.</string>
 	<key>账号或可用卡已变化，请核实后再长按。</key>
 	<string>The account or cards changed. Verify before holding again.</string>
+	<key>账号或可用卡已变化，请重新确认。</key>
+	<string>The account or available cards changed. Please review and confirm again.</string>
 	<key>跟随系统</key>
 	<string>System default</string>
 	<key>近 7 天 Token</key>
@@ -160,12 +182,18 @@
 	<string>Hold 0.8 s to use</string>
 	<key>长按 0.8 秒使用一张重置卡</key>
 	<string>Hold for 0.8 seconds to use one reset card</string>
+	<key>长按 0.8 秒打开确认</key>
+	<string>Hold 0.8 seconds to review</string>
 	<key>长按使用</key>
 	<string>Hold to use</string>
+	<key>长按打开上次重置的确认</key>
+	<string>Hold to review the previous reset</string>
 	<key>长按核实</key>
 	<string>Hold to verify</string>
 	<key>长按核实上次兑换</key>
 	<string>Hold to verify the previous reset</string>
+	<key>长按确认</key>
+	<string>Hold to review</string>
 	<key>隐藏胶囊</key>
 	<string>Hide capsule</string>
 	<key>额度窗口</key>

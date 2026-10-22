@@ -5,6 +5,23 @@ import SwiftUI
     @MainActor static func main() {
         _ = NSApplication.shared
         var failures=0
+        let resetAlert=ResetConfirmationPrompt.makeAlert(ResetConfirmation(accountID:"test-account",creditID:"test-credit",pendingKey:nil,availableCount:1))
+        if resetAlert.buttons.count == 2 && resetAlert.buttons[0].keyEquivalent == "\r" && resetAlert.buttons[1].keyEquivalent.isEmpty {
+            print("PASS: reset confirmation defaults to Cancel; confirmation has no Return shortcut")
+        } else { failures+=1; print("FAIL: reset confirmation keyboard defaults can authorize a reset") }
+        let escape=NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[],timestamp:0,windowNumber:resetAlert.window.windowNumber,context:nil,characters:"\u{1b}",charactersIgnoringModifiers:"\u{1b}",isARepeat:false,keyCode:53)!
+        if OverviewKeyboardDismissal.shouldClose(for:escape,modalWindow:nil)
+            && !OverviewKeyboardDismissal.shouldClose(for:escape,modalWindow:resetAlert.window) {
+            print("PASS: overview Escape handling yields to the reset confirmation window")
+        } else { failures+=1; print("FAIL: overview Escape handling can swallow confirmation cancellation") }
+        for (index,expected) in [(0,NSApplication.ModalResponse.alertFirstButtonReturn),(1,.alertSecondButtonReturn)] {
+            let alert=ResetConfirmationPrompt.makeAlert(ResetConfirmation(accountID:"test-account",creditID:"test-credit",pendingKey:nil,availableCount:1))
+            DispatchQueue.main.async { alert.buttons[index].performClick(nil) }
+            let response=alert.runModal()
+            if response == expected {
+                print("PASS: native confirmation button \(index) returns the expected decision")
+            } else { failures+=1; print("FAIL: native confirmation button returned an unexpected decision") }
+        }
         for scale in [1.0,1.5] {
             let store=QuotaStore(); store.scale=scale
             var clicks=0

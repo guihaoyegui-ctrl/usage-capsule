@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 — 2026-10-23
+
+- Require a separate customer confirmation before every reset or pending-reset reconciliation, including accessibility activation.
+- Default to Cancel; recheck account and card state after confirmation and reject stale consent.
+- Add simulated-service regression tests and confirmation text in all four languages.
+
 ## 0.7.0 — 2026-10-19
 
 - Package the native Usage Capsule as a self-contained Codex Skill with app source, glass assets, helper, and tests.

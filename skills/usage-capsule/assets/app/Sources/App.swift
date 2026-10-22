@@ -228,7 +228,9 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     func hideWidget() { closeOverview(animated:false); compact.orderOut(nil) }
     func installDismissEvents() {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching:.keyDown) { [weak self] event in
-            if event.keyCode == 53 { self?.closeOverview(animated:false); return nil }
+            if OverviewKeyboardDismissal.shouldClose(for:event,modalWindow:NSApplication.shared.modalWindow) {
+                self?.closeOverview(animated:false); return nil
+            }
             return event
         }
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching:[.leftMouseDown,.rightMouseDown]) { [weak self] _ in

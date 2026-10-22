@@ -1,6 +1,13 @@
 import SwiftUI
 import AppKit
 
+enum OverviewKeyboardDismissal {
+    static func shouldClose(for event:NSEvent,modalWindow:NSWindow?) -> Bool {
+        // A modal confirmation owns Escape until the customer makes a decision.
+        event.keyCode == 53 && modalWindow == nil
+    }
+}
+
 @MainActor final class OverviewMotion:ObservableObject {
     @Published var progress:CGFloat = 0
     @Published var origin:UnitPoint = .trailing

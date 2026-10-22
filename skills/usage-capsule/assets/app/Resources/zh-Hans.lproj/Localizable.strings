@@ -34,6 +34,8 @@
 	<string>切回原账号以核实兑换</string>
 	<key>刷新用量</key>
 	<string>刷新用量</string>
+	<key>取消</key>
+	<string>取消</string>
 	<key>取消固定</key>
 	<string>取消固定</string>
 	<key>可用 %@</key>
@@ -44,8 +46,12 @@
 	<string>固定概览</string>
 	<key>实时</key>
 	<string>实时</string>
+	<key>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</key>
+	<string>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</string>
 	<key>尚未同步</key>
 	<string>尚未同步</string>
+	<key>已取消，未提交重置请求。</key>
+	<string>已取消，未提交重置请求。</string>
 	<key>已用 %@</key>
 	<string>已用 %@</string>
 	<key>已知数据合计</key>
@@ -54,10 +60,14 @@
 	<string>常驻 184 × 60 pt · 3× 展示</string>
 	<key>常驻尺寸</key>
 	<string>常驻尺寸</string>
+	<key>当前可用：%@ 张</key>
+	<string>当前可用：%@ 张</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>当前没有可重置的额度窗口</string>
 	<key>待查询</key>
 	<string>待查询</string>
+	<key>打开重置确认，确认后才会使用重置卡</key>
+	<string>打开重置确认，确认后才会使用重置卡</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
@@ -110,6 +120,8 @@
 	<string>概览</string>
 	<key>正在核实…</key>
 	<string>正在核实…</string>
+	<key>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</key>
+	<string>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</string>
 	<key>演示模式</key>
 	<string>演示模式</string>
 	<key>用量概览</key>
@@ -126,6 +138,14 @@
 	<string>登录</string>
 	<key>登录 Codex</key>
 	<string>登录 Codex</string>
+	<key>确认使用</key>
+	<string>确认使用</string>
+	<key>确认使用重置卡？</key>
+	<string>确认使用重置卡？</string>
+	<key>确认核实</key>
+	<string>确认核实</string>
+	<key>确认核实上次重置？</key>
+	<string>确认核实上次重置？</string>
 	<key>示例数据</key>
 	<string>示例数据</string>
 	<key>立即刷新</key>
@@ -140,6 +160,8 @@
 	<string>请求超时，请检查网络后刷新。</string>
 	<key>账号或可用卡已变化，请核实后再长按。</key>
 	<string>账号或可用卡已变化，请核实后再长按。</string>
+	<key>账号或可用卡已变化，请重新确认。</key>
+	<string>账号或可用卡已变化，请重新确认。</string>
 	<key>跟随系统</key>
 	<string>跟随系统</string>
 	<key>近 7 天 Token</key>
@@ -160,12 +182,18 @@
 	<string>长按 0.8 秒使用</string>
 	<key>长按 0.8 秒使用一张重置卡</key>
 	<string>长按 0.8 秒使用一张重置卡</string>
+	<key>长按 0.8 秒打开确认</key>
+	<string>长按 0.8 秒打开确认</string>
 	<key>长按使用</key>
 	<string>长按使用</string>
+	<key>长按打开上次重置的确认</key>
+	<string>长按打开上次重置的确认</string>
 	<key>长按核实</key>
 	<string>长按核实</string>
 	<key>长按核实上次兑换</key>
 	<string>长按核实上次兑换</string>
+	<key>长按确认</key>
+	<string>长按确认</string>
 	<key>隐藏胶囊</key>
 	<string>隐藏胶囊</string>
 	<key>额度窗口</key>

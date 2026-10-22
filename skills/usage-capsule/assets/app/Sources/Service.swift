@@ -6,7 +6,47 @@ struct ServiceError: LocalizedError {
     let message: String
     var errorDescription: String? { message }
 }
-@MainActor final class CodexConnection {
+@MainActor enum ResetConfirmationPrompt {
+    static func makeAlert(_ context:ResetConfirmation) -> NSAlert {
+        let alert=NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = context.pendingKey == nil ? L10n.text("确认使用重置卡？") : L10n.text("确认核实上次重置？")
+        alert.informativeText = context.pendingKey == nil
+            ? L10n.text("此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。")
+            : L10n.text("将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。")
+        if let count=context.availableCount { alert.informativeText += "\n\n"+L10n.format("当前可用：%@ 张",String(count)) }
+        let cancel=alert.addButton(withTitle:L10n.text("取消"))
+        cancel.keyEquivalent="\r"
+        let confirm=alert.addButton(withTitle:context.pendingKey == nil ? L10n.text("确认使用") : L10n.text("确认核实"))
+        confirm.keyEquivalent=""
+        return alert
+    }
+    static func present(_ context:ResetConfirmation) -> Bool {
+        let alert=makeAlert(context)
+        let promptWindow=alert.window
+        let escapeMonitor=NSEvent.addLocalMonitorForEvents(matching:.keyDown) { event in
+            if event.window === promptWindow && event.keyCode == 53 {
+                NSApplication.shared.abortModal()
+                promptWindow.orderOut(nil)
+                return nil
+            }
+            return event
+        }
+        defer { if let escapeMonitor { NSEvent.removeMonitor(escapeMonitor) } }
+        NSApplication.shared.activate(ignoringOtherApps:true)
+        return alert.runModal() == .alertSecondButtonReturn
+    }
+}
+@MainActor protocol CodexServing: AnyObject {
+    var notification: ((String, [String: Any]) -> Void)? { get set }
+    func connect() async throws
+    func disconnect()
+    func request(_ method: String, params: [String: Any]) async throws -> Data
+}
+extension CodexServing {
+    func request(_ method: String) async throws -> Data { try await request(method,params:[:]) }
+}
+@MainActor final class CodexConnection: CodexServing {
     private var process: Process?
     private var input: Pipe?
     private var buffer = Data()
@@ -50,7 +90,7 @@ struct ServiceError: LocalizedError {
         }
         process = p; input = stdin; buffer.removeAll()
         try p.run()
-        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.0"], "capabilities": ["experimentalApi":true]])
+        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.1"], "capabilities": ["experimentalApi":true]])
         try send(["method":"initialized", "params": [:]])
         initialized = true
     }
@@ -115,9 +155,15 @@ struct ServiceError: LocalizedError {
     @Published var alwaysOnTop = true
     @Published var scale = 1.0
     @Published var language = UserDefaults.standard.string(forKey:"interfaceLanguage") ?? "system"
-    let connection = CodexConnection()
+    let connection: CodexServing
     private var timer: Timer?
-    let redemption = RedemptionLedger()
+    let redemption: RedemptionLedger
+    private let confirmReset: (ResetConfirmation) -> Bool
+    init(connection:CodexServing? = nil,redemption:RedemptionLedger? = nil,confirmReset:((ResetConfirmation)->Bool)? = nil) {
+        self.connection=connection ?? CodexConnection()
+        self.redemption=redemption ?? RedemptionLedger()
+        self.confirmReset=confirmReset ?? { ResetConfirmationPrompt.present($0) }
+    }
     var pendingRedemption: Bool { redemption.pending != nil }
     var primary: QuotaWindow? { limits?.bucket?.primary }
     var secondary: QuotaWindow? { limits?.bucket?.secondary }
@@ -127,10 +173,10 @@ struct ServiceError: LocalizedError {
     var redemptionLabel:String {
         if demo { return L10n.text("演示模式") }
         if pendingRedemption {
-            return redemption.pending?.accountID == limits?.accountId && limits?.accountId != nil ? L10n.text("长按核实上次兑换") : L10n.text("切回原账号以核实兑换")
+            return redemption.pending?.accountID == limits?.accountId && limits?.accountId != nil ? L10n.text("长按打开上次重置的确认") : L10n.text("切回原账号以核实兑换")
         }
         if limits?.accountId == nil { return L10n.text("暂无法确认兑换账号") }
-        return resetCount == 0 ? L10n.text("暂无重置卡") : L10n.text("长按 0.8 秒使用")
+        return resetCount == 0 ? L10n.text("暂无重置卡") : L10n.text("长按 0.8 秒打开确认")
     }
     func start() {
         if pendingRedemption { notice = L10n.text("上次兑换待核实，长按按钮可核实同一次兑换。") }
@@ -159,17 +205,40 @@ struct ServiceError: LocalizedError {
     func redeem() async {
         guard canRedeem else { return }
         redeeming = true; notice = nil
+        let attempted=await confirmAndRedeem()
+        redeeming=false
+        if attempted { await refresh() }
+    }
+    private func confirmation(for limits:LimitsResponse) -> ResetConfirmation? {
+        guard let accountID=limits.accountId else { return nil }
+        let creditID:String?
+        if let pending=redemption.pending { creditID=pending.creditID }
+        else {
+            creditID=limits.rateLimitResetCredits?.credits?.filter { $0.status == "available" }
+                .sorted { ($0.expiresAt ?? .greatestFiniteMagnitude) < ($1.expiresAt ?? .greatestFiniteMagnitude) }.first?.id
+        }
+        return ResetConfirmation(accountID:accountID,creditID:creditID,pendingKey:redemption.pending?.key,availableCount:limits.rateLimitResetCredits?.availableCount)
+    }
+    private func confirmAndRedeem() async -> Bool {
+        let expectedAccount=limits?.accountId
+        let context:ResetConfirmation
         do {
             let fresh = try JSONDecoder().decode(LimitsResponse.self,from:await connection.request("account/rateLimits/read"))
-            guard let accountID = fresh.accountId, accountID == limits?.accountId,
-                  mayRedeem(cardCount:fresh.rateLimitResetCredits?.availableCount,pending:redemption.pending,busy:false,connected:true,accountID:accountID) else {
-                limits = fresh; notice = L10n.text("账号或可用卡已变化，请核实后再长按。"); redeeming = false; return
+            limits=fresh
+            guard fresh.accountId == expectedAccount, let snapshot=confirmation(for:fresh),
+                  mayRedeem(cardCount:snapshot.availableCount,pending:redemption.pending,busy:false,connected:true,accountID:snapshot.accountID) else {
+                notice=L10n.text("账号或可用卡已变化，请重新确认。"); return false
             }
-            limits = fresh
-        } catch { notice = L10n.format("暂无法核实兑换账号：%@", String(describing: (error.localizedDescription))); redeeming = false; return }
-        let creditID = limits?.rateLimitResetCredits?.credits?.filter { $0.status == "available" }
-            .sorted { ($0.expiresAt ?? .greatestFiniteMagnitude) < ($1.expiresAt ?? .greatestFiniteMagnitude) }.first?.id
-        let attempt = redemption.begin(creditID:creditID,accountID:limits!.accountId!)
+            context=snapshot
+            guard confirmReset(context) else { notice=L10n.text("已取消，未提交重置请求。"); return false }
+            let latest=try JSONDecoder().decode(LimitsResponse.self,from:await connection.request("account/rateLimits/read"))
+            limits=latest
+            guard confirmation(for:latest) == context,
+                  mayRedeem(cardCount:latest.rateLimitResetCredits?.availableCount,pending:redemption.pending,busy:false,connected:true,accountID:latest.accountId) else {
+                notice=L10n.text("账号或可用卡已变化，请重新确认。"); return false
+            }
+        } catch { notice=L10n.format("暂无法核实兑换账号：%@",error.localizedDescription); return false }
+        let attempt = redemption.begin(creditID:context.creditID,accountID:context.accountID)
         var params: [String:Any] = ["idempotencyKey":attempt.key]
         if let creditID = attempt.creditID { params["creditId"] = creditID }
         do {
@@ -184,8 +253,7 @@ struct ServiceError: LocalizedError {
             case .unknown: notice = L10n.text("结果暂不明确，请刷新核实；再次使用会复用本次请求。")
             }
         } catch { notice = L10n.format("兑换结果未确认：%@；重试将核实同一次兑换。", String(describing: (error.localizedDescription))) }
-        redeeming = false
-        await refresh()
+        return true
     }
     func login() async {
         do {
