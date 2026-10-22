@@ -122,9 +122,9 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     }
     func placeCompact() {
         let screen = NSScreen.main?.visibleFrame ?? NSRect(x:0,y:0,width:1440,height:900)
-        let x = UserDefaults.standard.object(forKey:"widgetX") as? Double
-        let y = UserDefaults.standard.object(forKey:"widgetY") as? Double
-        let origin = CGPoint(x:x ?? screen.maxX-compact.frame.width-24,y:y ?? screen.minY+28)
+        let x = (UserDefaults.standard.object(forKey:"widgetX") as? Double).map { CGFloat($0) }
+        let y = (UserDefaults.standard.object(forKey:"widgetY") as? Double).map { CGFloat($0) }
+        let origin = CGPoint(x:x ?? (screen.maxX-compact.frame.width-24),y:y ?? (screen.minY+28))
         compact.setFrameOrigin(clamped(origin,in:screen,size:compact.frame.size))
     }
     func clamped(_ point:CGPoint,in screen:NSRect,size:NSSize) -> CGPoint {
