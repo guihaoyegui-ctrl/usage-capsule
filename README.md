@@ -15,6 +15,7 @@ A tiny, native macOS window for your Codex five-hour and weekly quota. Polished 
 - Supports dragging from the whole widget frame, a menu-bar recovery control, 100–150% scaling, and always-on-top mode.
 - Includes Simplified Chinese, English, Japanese, and Korean, with automatic system-language selection.
 - Displays eligible reset cards, with a 0.8-second hold to open a confirmation dialog. A card is used only after the customer explicitly confirms; Cancel and Escape submit nothing. Preview and demo modes cannot redeem cards.
+- Reconnects once when the local Codex login expires. If authorization still fails, it hides stale percentages and asks for sign-in.
 
 ## Requirements
 

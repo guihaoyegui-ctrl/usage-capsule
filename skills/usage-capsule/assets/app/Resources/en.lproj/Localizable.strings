@@ -138,6 +138,8 @@
 	<string>Sign in</string>
 	<key>登录 Codex</key>
 	<string>Sign in to Codex</string>
+	<key>Codex 登录已过期，请重新登录后刷新。</key>
+	<string>Your Codex sign-in expired. Sign in again to refresh usage.</string>
 	<key>确认使用</key>
 	<string>Use one card</string>
 	<key>确认使用重置卡？</key>

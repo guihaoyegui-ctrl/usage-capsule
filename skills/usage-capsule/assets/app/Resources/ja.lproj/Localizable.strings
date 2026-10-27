@@ -138,6 +138,8 @@
 	<string>ログイン</string>
 	<key>登录 Codex</key>
 	<string>Codex にログイン</string>
+	<key>Codex 登录已过期，请重新登录后刷新。</key>
+	<string>Codex のログイン期限が切れました。再ログインして使用状況を更新してください。</string>
 	<key>确认使用</key>
 	<string>カードを1枚使用</string>
 	<key>确认使用重置卡？</key>

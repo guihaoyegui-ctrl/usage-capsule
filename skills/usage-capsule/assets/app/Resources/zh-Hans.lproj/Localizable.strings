@@ -138,6 +138,8 @@
 	<string>登录</string>
 	<key>登录 Codex</key>
 	<string>登录 Codex</string>
+	<key>Codex 登录已过期，请重新登录后刷新。</key>
+	<string>Codex 登录已过期，请重新登录后刷新。</string>
 	<key>确认使用</key>
 	<string>确认使用</string>
 	<key>确认使用重置卡？</key>

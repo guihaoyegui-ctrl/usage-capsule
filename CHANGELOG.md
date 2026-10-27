@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.2 — 2026-10-27
+
+- Recover from an expired Codex login by rebuilding the local background connection and reading quotas again once.
+- Hide stale percentages and show a sign-in message if renewal still fails, instead of leaving a misleading 99% on the capsule.
+- Cover renewed, still-expired, and temporary-network-error cases with simulated-service tests.
+
 ## 0.7.1 — 2026-10-23
 
 - Require a separate customer confirmation before every reset or pending-reset reconciliation, including accessibility activation.

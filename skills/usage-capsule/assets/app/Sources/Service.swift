@@ -6,6 +6,10 @@ struct ServiceError: LocalizedError {
     let message: String
     var errorDescription: String? { message }
 }
+private func expiredAuthentication(_ error: Error) -> Bool {
+    let message = error.localizedDescription.lowercased()
+    return message.contains("token_expired") || message.contains("401 unauthorized")
+}
 @MainActor enum ResetConfirmationPrompt {
     static func makeAlert(_ context:ResetConfirmation) -> NSAlert {
         let alert=NSAlert()
@@ -90,7 +94,7 @@ extension CodexServing {
         }
         process = p; input = stdin; buffer.removeAll()
         try p.run()
-        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.1"], "capabilities": ["experimentalApi":true]])
+        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.2"], "capabilities": ["experimentalApi":true]])
         try send(["method":"initialized", "params": [:]])
         initialized = true
     }
@@ -191,16 +195,31 @@ extension CodexServing {
     func refresh() async {
         guard !refreshing, !redeeming, !demo else { return }
         refreshing = true; defer { refreshing = false }
+        var authenticationExpired = false
         do {
             try await connection.connect()
-            limits = try JSONDecoder().decode(LimitsResponse.self,from:await connection.request("account/rateLimits/read"))
+            let rateLimitData: Data
+            do { rateLimitData = try await connection.request("account/rateLimits/read") }
+            catch {
+                guard expiredAuthentication(error) else { throw error }
+                authenticationExpired = true
+                connection.disconnect()
+                try await connection.connect()
+                rateLimitData = try await connection.request("account/rateLimits/read")
+            }
+            limits = try JSONDecoder().decode(LimitsResponse.self,from:rateLimitData)
             lastSync = Date(); error = nil
             do {
                 let usage = try JSONDecoder().decode(UsageResponse.self,from:await connection.request("account/usage/read"))
                 days = recentDays(buckets:usage.dailyUsageBuckets); usageError = nil
                 if !days.contains(where:{$0.date == selectedDay}) { selectedDay = days.last?.date ?? todayKey() }
             } catch { usageError = L10n.format("日用量暂无法读取：%@", String(describing: (error.localizedDescription))) }
-        } catch { self.error = error.localizedDescription }
+        } catch {
+            if authenticationExpired || expiredAuthentication(error) {
+                limits = nil; days = recentDays(buckets:nil); lastSync = nil; usageError = nil
+                self.error = L10n.text("Codex 登录已过期，请重新登录后刷新。")
+            } else { self.error = error.localizedDescription }
+        }
     }
     func redeem() async {
         guard canRedeem else { return }

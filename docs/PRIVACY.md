@@ -8,6 +8,8 @@ The app launches the user's installed Codex CLI as an app-server over local stan
 
 Automatic refresh runs once per minute. It calls account-reading methods rather than a model generation turn; it does not send prompts or start conversations. Normal Codex conversations used to install or modify this project have their own model usage.
 
+If the local Codex connection reports an expired login, the widget restarts that local child process and retries one read. It does not read or store the login token itself. If renewal fails, it clears the displayed quota figures and asks the user to sign in again.
+
 Quota percentages, reset timestamps, daily totals, and reset-card counts are held in app memory for display. Local preferences store window placement, scale, language, the CLI path, and display options. A local pending-redemption ledger retains the account/card identity and idempotency key needed to reconcile an uncertain reset request. These values are not uploaded by this project. They should not be included in bug reports.
 
 ## Reset cards

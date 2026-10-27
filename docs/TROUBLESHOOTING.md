@@ -12,6 +12,8 @@ Install Codex locally and sign in. The helper checks common Codex/ChatGPT app an
 
 Open the overview and inspect its error/sync status. Process status is independent of account connectivity. Refresh once after signing in. An older or different CLI can expose quota without daily usage or reset-card methods; those fields remain unavailable. The `日额` label means the five-hour window, not a midnight-to-midnight daily allowance.
 
+If a Codex login expires, the widget restarts its local CLI connection and retries one read. If the new connection is still unauthorized, quota figures become unavailable and the overview asks you to sign in again. Renewing a Plus or other plan does not make an expired login token valid by itself. After signing in through Codex, use Refresh or wait for the next automatic update. A temporary network error retains the last known figures with an explicit update-failed warning.
+
 ## Permissions in an agent sandbox
 
 The helper may need the normal permission mechanism for writing the install directory, inspecting its own process, and rendering a native preview. A denied `ps` command or aborted desktop render does not mean the app is broken. Ask the local environment for the required access; keep the sandbox and Gatekeeper enabled.

@@ -93,7 +93,8 @@ import Foundation
         check(backgroundPrompts==0 && backgroundRPC.consumed.isEmpty,"refresh never asks for or consumes a reset card")
         background.loadDemo(); await background.redeem()
         check(backgroundPrompts==0 && backgroundRPC.consumed.isEmpty,"demo mode cannot ask for or submit a reset")
-        print("Reset confirmation: \(failures) failures")
+        failures += await RefreshRecoveryTests.run()
+        print("Reset confirmation and refresh recovery: \(failures) failures")
         if failures>0 { exit(1) }
     }
 }
