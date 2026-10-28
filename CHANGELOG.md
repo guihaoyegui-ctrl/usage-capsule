@@ -5,7 +5,7 @@
 - Add an opt-in task picker and native Codex queue handoff after a verified quota failure and recovery, with individual removal and queued-message cancellation.
 - Bind selections to the account; require explicit quota errors and both quotas to be available, recheck the latest turn, and persist dispatch markers before submission.
 - Persist locked handoff records before submission, reconcile uncertain outcomes without resending, and let Codex handle execution and approvals. Quota polling remains non-generative; continuations use quota.
-- Add simulated-service coverage and document the preview's runtime and compatibility limits. No live model task or reset card was used to test auto-resume.
+- Add simulated-service coverage and document the preview's runtime and compatibility limits. A disposable task completed one real desktop model turn after simulated quota recovery; cancellation was separately verified in the real queue. No real quota reset or reset card was used.
 
 ## 0.7.2 — 2026-10-27
 
