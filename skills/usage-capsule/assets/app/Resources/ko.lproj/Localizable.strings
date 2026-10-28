@@ -4,6 +4,8 @@
 <dict>
 	<key>%@ Token 消耗 %@</key>
 	<string>%@ Token 사용량: %@</string>
+	<key>%@ 个任务</key>
+	<string>작업 %@개</string>
 	<key>%@ 天额度</key>
 	<string>%@일 한도</string>
 	<key>%@ 小时额度</key>
@@ -20,42 +22,90 @@
 	<string>7일 합계</string>
 	<key>Codex 未连接</key>
 	<string>Codex에 연결되지 않았습니다</string>
+	<key>Codex 登录已过期，请重新登录后刷新。</key>
+	<string>Codex 로그인이 만료되었습니다. 다시 로그인한 후 사용량을 새로고침하세요.</string>
 	<key>Codex 连接已关闭，请重试刷新。</key>
 	<string>Codex 연결이 종료되었습니다. 새로 고침해 주세요.</string>
 	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
 	<string>이전 초기화가 확인되지 않았습니다. 길게 눌러 같은 요청을 확인하세요.</string>
+	<key>任务列表暂无法读取：%@</key>
+	<string>작업 목록을 읽을 수 없습니다: %@</string>
+	<key>任务已有排队消息，请在 Codex 查看</key>
+	<string>작업에 대기 중인 메시지가 있습니다. Codex에서 확인하세요</string>
+	<key>任务状态已变化，请在 Codex 查看</key>
+	<string>작업 상태가 변경되었습니다. Codex에서 확인하세요</string>
 	<key>保持在其他窗口上方</key>
 	<string>항상 다른 창 위에 표시</string>
+	<key>停止结果待核实，请在 Codex 查看</key>
+	<string>중지 여부 미확인 · Codex에서 확인하세요</string>
 	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
 	<string>초기화 미확인: %@. 재시도 시 같은 요청을 확인합니다.</string>
+	<key>全部取消</key>
+	<string>모두 해제</string>
 	<key>关闭概览</key>
 	<string>개요 닫기</string>
 	<key>切回原账号以核实兑换</key>
 	<string>원래 계정으로 전환하여 확인</string>
+	<key>刷新列表</key>
+	<string>목록 새로 고침</string>
 	<key>刷新用量</key>
 	<string>사용량 새로 고침</string>
+	<key>加载更多</key>
+	<string>더 보기</string>
 	<key>取消</key>
 	<string>취소</string>
 	<key>取消固定</key>
 	<string>개요 고정 해제</string>
+	<key>取消排队</key>
+	<string>대기 취소</string>
+	<key>取消结果待核实，请在 Codex 查看</key>
+	<string>취소 여부 미확인 · Codex에서 확인하세요</string>
+	<key>取消选择</key>
+	<string>선택 해제</string>
+	<key>取消选择并停止续跑</key>
+	<string>선택 해제 및 재개 중지</string>
+	<key>只续跑你选中的任务。检测到额度耗尽后，额度恢复时在原对话继续；同时最多运行一个。</key>
+	<string>선택한 작업만 재개합니다. 한도 소진을 감지한 후 한도가 회복되면 원래 대화를 한 번에 하나씩 이어갑니다.</string>
+	<key>只续跑你选中的任务。额度恢复后，任务会逐个交给 Codex 在原对话继续。</key>
+	<string>선택한 작업만 한도 회복 후 Codex에 차례로 전달하여 원래 대화를 이어갑니다.</string>
 	<key>可用 %@</key>
 	<string>사용 가능 %@</string>
 	<key>周额</key>
 	<string>주간</string>
 	<key>固定概览</key>
 	<string>개요 고정</string>
+	<key>在 Codex 查看</key>
+	<string>Codex에서 열기</string>
 	<key>实时</key>
 	<string>실시간</string>
 	<key>将继续核实上次重置请求；如果上次尚未执行，仍可能消耗 1 张重置卡。</key>
 	<string>이전 초기화 요청을 다시 확인합니다. 아직 실행되지 않았다면 초기화 카드 1장이 소비될 수 있습니다.</string>
 	<key>尚未同步</key>
 	<string>동기화 전</string>
+	<key>已交给 Codex，请在原任务查看</key>
+	<string>Codex에 전달됨 · 원래 작업에서 확인하세요</string>
+	<key>已停止，请在 Codex 继续</key>
+	<string>중지됨 · Codex에서 계속하세요</string>
+	<key>已取消排队</key>
+	<string>대기 중인 재개가 취소됨</string>
 	<key>已取消，未提交重置请求。</key>
 	<string>취소되었습니다. 초기화 요청을 보내지 않았습니다.</string>
+	<key>已排队，等待 Codex 处理</key>
+	<string>대기열에 추가됨 · Codex 처리 대기 중</string>
+	<key>已排队，请打开 Codex</key>
+	<string>대기열에 추가됨 · Codex를 여세요</string>
+	<key>已核实</key>
+	<string>확인됨</string>
+	<key>已核实，清除</key>
+	<string>확인 후 지우기</string>
 	<key>已用 %@</key>
 	<string>사용 %@</string>
 	<key>已知数据合计</key>
 	<string>확인된 사용량 합계</string>
+	<key>已选中，等待额度中断</key>
+	<string>선택됨 · 한도 초과 중단 감시 중</string>
+	<key>已选任务</key>
+	<string>선택한 작업</string>
 	<key>常驻 184 × 60 pt · 3× 展示</key>
 	<string>184 × 60 pt · 3배 미리보기</string>
 	<key>常驻尺寸</key>
@@ -72,6 +122,8 @@
 	<string>아무 곳이나 끌어 이동하세요. 마우스를 올려 미리 보고 클릭하여 고정합니다. × 또는 Escape로 닫고 우클릭이나 메뉴 막대에서 종료합니다. 1분마다 갱신됩니다.</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
 	<string>아무 곳이나 드래그 · 마우스를 올려 보기 · 클릭하여 고정 · 우클릭하여 종료</string>
+	<key>提交结果待核实，请在 Codex 查看</key>
+	<string>전송 결과 미확인 · Codex에서 확인하세요</string>
 	<key>日用量暂无法读取：%@</key>
 	<string>일별 사용량을 읽을 수 없습니다: %@</string>
 	<key>日额</key>
@@ -88,6 +140,8 @@
 	<string>사용 불가</string>
 	<key>暂无卡片</key>
 	<string>카드 없음</string>
+	<key>暂无可选任务，请登录 Codex 后刷新列表</key>
+	<string>선택할 작업이 없습니다. Codex에 로그인한 후 새로 고침하세요.</string>
 	<key>暂无数据</key>
 	<string>데이터 없음</string>
 	<key>暂无时间</key>
@@ -96,6 +150,8 @@
 	<string>사용 가능한 초기화 카드가 없습니다</string>
 	<key>暂无法核实兑换账号：%@</key>
 	<string>초기화 계정을 확인할 수 없습니다: %@</string>
+	<key>暂无法检查，请刷新或在 Codex 查看</key>
+	<string>확인할 수 없습니다 · 새로 고침하거나 Codex를 여세요</string>
 	<key>暂无法确认兑换账号</key>
 	<string>계정 미확인</string>
 	<key>暂无重置卡</key>
@@ -114,14 +170,24 @@
 	<string>Codex를 찾지 못했습니다. 먼저 Codex 데스크톱 앱을 설치하거나 실행하세요.</string>
 	<key>本周额度</key>
 	<string>주간 한도</string>
+	<key>本轮已结束，继续监测</key>
+	<string>응답 종료 · 감시 계속</string>
 	<key>查看 / 固定概览</key>
 	<string>개요 표시 / 고정</string>
 	<key>概览</key>
 	<string>개요</string>
+	<key>正在加入 Codex 队列…</key>
+	<string>Codex 대기열에 추가 중…</string>
+	<key>正在恢复…</key>
+	<string>재개 중…</string>
 	<key>正在核实…</key>
 	<string>확인 중…</string>
+	<key>正在自动续跑</key>
+	<string>자동 재개 실행 중</string>
 	<key>此操作会向当前 Codex 账号提交重置请求；成功后消耗 1 张重置卡，无法撤销。</key>
 	<string>현재 Codex 계정에 초기화를 요청합니다. 성공하면 카드 1장이 소비되며 되돌릴 수 없습니다.</string>
+	<key>清除记录</key>
+	<string>기록 지우기</string>
 	<key>演示模式</key>
 	<string>데모 모드</string>
 	<key>用量概览</key>
@@ -138,8 +204,6 @@
 	<string>로그인</string>
 	<key>登录 Codex</key>
 	<string>Codex 로그인</string>
-	<key>Codex 登录已过期，请重新登录后刷新。</key>
-	<string>Codex 로그인이 만료되었습니다. 다시 로그인한 후 사용량을 새로고침하세요.</string>
 	<key>确认使用</key>
 	<string>카드 1장 사용</string>
 	<key>确认使用重置卡？</key>
@@ -152,10 +216,28 @@
 	<string>예시 데이터</string>
 	<key>立即刷新</key>
 	<string>지금 새로 고침</string>
+	<key>等待原账号登录</key>
+	<string>원래 계정 로그인 대기 중</string>
+	<key>等待额度恢复</key>
+	<string>사용 한도 회복 대기 중</string>
+	<key>管理自动续跑</key>
+	<string>자동 재개 관리</string>
 	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
 	<string>결과가 불확실합니다. 새로 고침하여 확인하세요. 재시도 시 같은 요청을 사용합니다.</string>
+	<key>续跑会消耗额度。请保持胶囊运行；无法确认中断原因时不会自动继续。已开始的任务可在 Codex 中停止，审批仍由你决定。</key>
+	<string>재개 시 사용 한도가 소모됩니다. 캡슐을 실행해 두세요. 중단 원인이 불명확하면 자동 재개하지 않습니다. 시작된 작업은 Codex에서 중지하며 승인은 직접 결정합니다.</string>
+	<key>续跑会消耗额度。需保持胶囊运行；电脑休眠期间不执行。无法确认中断原因时不会自动继续；需要审批时会停下提示你。</key>
+	<string>재개 시 사용 한도가 소모됩니다. 캡슐을 실행해 두세요. Mac이 잠자기 상태이면 실행되지 않습니다. 중단 원인이 확인되지 않으면 건너뛰며, 승인이 필요하면 멈추고 알립니다.</string>
+	<key>续跑记录</key>
+	<string>재개 기록</string>
+	<key>续跑记录无法读取，请检查本机存储</key>
+	<string>재개 기록을 읽을 수 없습니다. 로컬 저장소를 확인하세요</string>
+	<key>自动续跑</key>
+	<string>자동 재개</string>
 	<key>设置</key>
 	<string>설정</string>
+	<key>请先在 Codex 确认任务状态</key>
+	<string>먼저 Codex에서 작업 상태를 확인하세요</string>
 	<key>请在浏览器完成登录，然后刷新</key>
 	<string>브라우저에서 로그인한 후 새로 고침하세요</string>
 	<key>请求超时，请检查网络后刷新。</key>
@@ -172,6 +254,8 @@
 	<string>연결 해제됨</string>
 	<key>退出用量胶囊</key>
 	<string>사용량 캡슐 종료</string>
+	<key>选择任务</key>
+	<string>작업 선택</string>
 	<key>重置 %@</key>
 	<string>초기화 %@</string>
 	<key>重置卡 %@</key>
@@ -198,6 +282,8 @@
 	<string>길게 눌러 확인</string>
 	<key>隐藏胶囊</key>
 	<string>캡슐 숨기기</string>
+	<key>需要你确认，请在 Codex 继续</key>
+	<string>확인이 필요합니다 · Codex에서 계속하세요</string>
 	<key>额度窗口</key>
 	<string>한도 구간</string>
 </dict>

@@ -17,6 +17,8 @@
 - 查询可用重置卡，长按 0.8 秒先打开确认框，客户明确点击“确认使用”后才提交；取消或按 Escape 不会消费。演示模式禁止兑换。
 - 登录过期时自动重建连接并重试一次；仍无法读取时隐藏旧额度，提示重新登录，避免把过期数据当成实时额度。
 
+- 新增可控的自动续跑：在概览或右键菜单打开**自动续跑**，逐个勾选任务。胶囊检测到额度耗尽及明确的额度中断后，额度恢复时继续原对话；可取消选择并移除仍在队列中的指令，已开始的任务可在 Codex 中停止。详见[运行规则](docs/AUTO_RESUME.md)。
+
 ## 使用条件
 
 需要 **Apple Silicon Mac、macOS 13 或更高版本、Xcode 命令行工具**。查询真实用量还需要本机已登录的 Codex CLI。应用使用 SwiftUI 与 AppKit，无需 Electron 或 Node。
@@ -49,7 +51,7 @@ zsh skills/usage-capsule/scripts/capsule.sh start
 
 ## 刷新与隐私
 
-每 60 秒通过本机 Codex app-server 查询账号用量，不创建模型生成任务，因此刷新本身不会调用模型生成 Token。安装和交谈过程仍有正常的模型用量。应用复用本机 Codex 登录，无需 API Key，没有开发者服务器或统计上报。详见[数据与隐私](docs/PRIVACY.md)、[常见问题](docs/TROUBLESHOOTING.md)。
+每 60 秒通过本机 Codex app-server 查询账号用量，不创建模型生成任务，因此刷新本身不会调用模型生成 Token。启用自动续跑后，实际继续任务会消耗额度；安装和交谈过程也有正常的模型用量。应用复用本机 Codex 登录，无需 API Key，没有开发者服务器或统计上报。详见[数据与隐私](docs/PRIVACY.md)、[常见问题](docs/TROUBLESHOOTING.md)。
 
 ## 验证与源码
 

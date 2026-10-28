@@ -1,12 +1,13 @@
-# Validation scope — 0.7.2
+# Validation scope — 0.8.0
 
 Validated locally on an Apple Silicon Mac with Swift 6.4. The project targets macOS 13+; it has not been tested on every supported OS release.
 
 - Logic: quota conversion and clamping, five palette levels and their boundaries, missing versus zero daily data, seven-day ordering, reset outcomes, persistent idempotency and account-switch protection.
 - Reset confirmation: simulated account service checks cancellation/dismissal, explicit consent, repeated activation, account/card changes during confirmation, per-attempt approval, pending-request idempotency, background refresh, and demo mode. Native component checks verify that Return defaults to Cancel, the overview's Escape handler yields to a modal confirmation, and native Cancel/Confirm buttons return the expected decisions. These tests never use the live account or a real card. Physical keyboard input is not claimed as tested.
 - Login renewal: simulated expired-token responses verify one local reconnection and fresh Plus quotas, persistent authorization failure hides stale values, and unrelated network errors retain last-known values with a warning. A manual read-only diagnostic observed the original 401 `token_expired` while a fresh child process returned both renewed quota windows; no model turn or reset-card action was used.
+- Auto-resume: simulated quota transitions and service responses cover opt-in selection, account switch, unknown quota, stale turns, queued-message cancellation, account-independent cancellation, uncertain delivery, cross-instance ownership, queue reconciliation, and no duplicate submission. Isolated offline app-server tests verified shared cold-thread queue persistence and found that repeated client message IDs do not deduplicate. The desktop wake-to-model cycle and a real quota exhaustion cycle have not been tested. No model turn or card was used by these checks.
 - Interaction: click/drag/hover state transitions, dismissal, popup anchor placement, and native hit coverage across the 200 × 76 pt and 292 × 106 pt window frames, including the rim and transparent margins.
-- Localization: all 99 keys present in each of four languages, matching format arguments, language resolution and fallback; rendered native sample-data previews reviewed for English, Chinese, Japanese, and Korean.
+- Localization: keys are checked in all four languages with matching format arguments, language resolution and fallback; existing native sample-data previews were reviewed for English, Chinese, Japanese, and Korean.
 - Distribution: Skill metadata validator, native build, ad-hoc code-signature verification, and isolated source installation with paths containing spaces. Offline rendering uses sample data only.
 
 Native hit coverage is a component check. Automated physical desktop dragging is not claimed as tested: the available automation tool cannot perform the native drag action. Live-account connectivity and reset redemption are not part of distribution tests. No card is consumed during tests.

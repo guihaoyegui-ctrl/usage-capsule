@@ -6,7 +6,7 @@ struct ServiceError: LocalizedError {
     let message: String
     var errorDescription: String? { message }
 }
-private func expiredAuthentication(_ error: Error) -> Bool {
+func expiredAuthentication(_ error: Error) -> Bool {
     let message = error.localizedDescription.lowercased()
     return message.contains("token_expired") || message.contains("401 unauthorized")
 }
@@ -94,7 +94,7 @@ extension CodexServing {
         }
         process = p; input = stdin; buffer.removeAll()
         try p.run()
-        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.2"], "capabilities": ["experimentalApi":true]])
+        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.8.0"], "capabilities": ["experimentalApi":true]])
         try send(["method":"initialized", "params": [:]])
         initialized = true
     }
@@ -159,12 +159,31 @@ extension CodexServing {
     @Published var alwaysOnTop = true
     @Published var scale = 1.0
     @Published var language = UserDefaults.standard.string(forKey:"interfaceLanguage") ?? "system"
+    @Published var recentThreads: [ResumeThreadChoice] = []
+    @Published var loadingThreads = false
+    @Published var resumeStatuses: [String:String] = [:]
+    @Published var resumeNotice: String?
+    @Published var activeHandoffSubmissionID: String?
+    var resumeScanning = false
+    var resumeListCursor: String?
+    let resumeLedger: ResumeLedger
+    let handoffLedger: HandoffLedger
+    let wakeThread: (String)->Bool
+    let taskConnection: CodexServing
+    var openResumeSettings: (() -> Void)?
     let connection: CodexServing
     private var timer: Timer?
     let redemption: RedemptionLedger
     private let confirmReset: (ResetConfirmation) -> Bool
-    init(connection:CodexServing? = nil,redemption:RedemptionLedger? = nil,confirmReset:((ResetConfirmation)->Bool)? = nil) {
+    init(connection:CodexServing? = nil,taskConnection:CodexServing? = nil,redemption:RedemptionLedger? = nil,resumeLedger:ResumeLedger? = nil,handoffLedger:HandoffLedger? = nil,wakeThread:((String)->Bool)? = nil,confirmReset:((ResetConfirmation)->Bool)? = nil) {
         self.connection=connection ?? CodexConnection()
+        self.taskConnection=taskConnection ?? connection ?? CodexConnection()
+        self.resumeLedger=resumeLedger ?? ResumeLedger()
+        self.handoffLedger=handoffLedger ?? HandoffLedger()
+        self.wakeThread=wakeThread ?? { id in
+            guard UUID(uuidString:id) != nil, let url=URL(string:"codex://threads/wake/\(id)") else { return false }
+            return NSWorkspace.shared.open(url)
+        }
         self.redemption=redemption ?? RedemptionLedger()
         self.confirmReset=confirmReset ?? { ResetConfirmationPrompt.present($0) }
     }
@@ -191,7 +210,7 @@ extension CodexServing {
         Task { await refresh() }
         timer = Timer.scheduledTimer(withTimeInterval:60,repeats:true) { [weak self] _ in Task { @MainActor [weak self] in await self?.refresh() } }
     }
-    func stop() { timer?.invalidate(); connection.disconnect() }
+    func stop() { timer?.invalidate(); connection.disconnect(); taskConnection.disconnect() }
     func refresh() async {
         guard !refreshing, !redeeming, !demo else { return }
         refreshing = true; defer { refreshing = false }
@@ -214,6 +233,7 @@ extension CodexServing {
                 days = recentDays(buckets:usage.dailyUsageBuckets); usageError = nil
                 if !days.contains(where:{$0.date == selectedDay}) { selectedDay = days.last?.date ?? todayKey() }
             } catch { usageError = L10n.format("日用量暂无法读取：%@", String(describing: (error.localizedDescription))) }
+            await scanAutoResume()
         } catch {
             if authenticationExpired || expiredAuthentication(error) {
                 limits = nil; days = recentDays(buckets:nil); lastSync = nil; usageError = nil

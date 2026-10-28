@@ -94,6 +94,8 @@ import Foundation
         background.loadDemo(); await background.redeem()
         check(backgroundPrompts==0 && backgroundRPC.consumed.isEmpty,"demo mode cannot ask for or submit a reset")
         failures += await RefreshRecoveryTests.run()
+        failures += await AutoResumeTests.run()
+        failures += await NativeQueueTests.run()
         print("Reset confirmation and refresh recovery: \(failures) failures")
         if failures>0 { exit(1) }
     }

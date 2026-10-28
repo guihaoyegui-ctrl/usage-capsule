@@ -17,6 +17,8 @@ A tiny, native macOS window for your Codex five-hour and weekly quota. Polished 
 - Displays eligible reset cards, with a 0.8-second hold to open a confirmation dialog. A card is used only after the customer explicitly confirms; Cancel and Escape submit nothing. Preview and demo modes cannot redeem cards.
 - Reconnects once when the local Codex login expires. If authorization still fails, it hides stale percentages and asks for sign-in.
 
+- Adds opt-in automatic continuation for individually selected tasks. After the widget observes a structured quota failure with exhausted quota, it continues the same conversation once capacity returns. Manage the queue from **Auto-resume** in the overview or menu. [Behavior and limits](docs/AUTO_RESUME.md).
+
 ## Requirements
 
 **macOS 13 or later on Apple Silicon**, Xcode Command Line Tools, and a local signed-in Codex CLI for live usage. The native app is written in SwiftUI and AppKit, with no Electron or Node dependency.
@@ -53,7 +55,7 @@ Supported codes: `system`, `zh-Hans`, `en`, `ja`, `ko`. For an offline PNG with 
 
 ## Data and privacy
 
-Live refresh runs every 60 seconds using the local Codex app-server's account-reading methods. It creates no model generation turn. The app uses your existing local Codex login and has no analytics service or developer backend. See [data flow and privacy](docs/PRIVACY.md) and [troubleshooting](docs/TROUBLESHOOTING.md).
+Live refresh runs every 60 seconds using the local Codex app-server's account-reading methods. Quota checks create no model generation turn. Opt-in auto-resume starts a new turn and consumes quota. The app uses your existing local Codex login and has no analytics service or developer backend. See [data flow and privacy](docs/PRIVACY.md) and [troubleshooting](docs/TROUBLESHOOTING.md).
 
 ## Development
 

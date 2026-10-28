@@ -19,6 +19,7 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     var hideTask: Task<Void,Never>?
     var subscription: AnyCancellable?
     var settingsWindow: NSWindow?
+    var resumeWindow: NSWindow?
     var presentation = OverviewPresentation()
     let motion = OverviewMotion()
     var motionTask:Task<Void,Never>?
@@ -47,11 +48,13 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         compact.orderFrontRegardless()
         installMenu()
         installDismissEvents()
+        store.openResumeSettings = { [weak self] in self?.showResumeSettings() }
         store.start()
         subscription = store.objectWillChange.sink { [weak self] in
             DispatchQueue.main.async { self?.resizeOverview(); self?.updateMenuTitle() }
         }
         if ProcessInfo.processInfo.arguments.contains("--show-overview") { presentation.togglePin(); applyPresentation() }
+        if ProcessInfo.processInfo.arguments.contains("--show-resume") { showResumeSettings() }
         if ProcessInfo.processInfo.arguments.contains("--smoke") { runSmoke() }
     }
     var compactSize:NSSize { NSSize(width:184*store.scale+16,height:60*store.scale+16) }
@@ -170,7 +173,7 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     func capsuleMenu() -> NSMenu {
         hideTask?.cancel()
         let menu=NSMenu()
-        for (title,selector) in [(L10n.text("查看 / 固定概览"),#selector(pinMenu)),(L10n.text("关闭概览"),#selector(closeMenu)),(L10n.text("刷新用量"),#selector(refreshMenu)),(L10n.text("设置"),#selector(settingsMenu)),(L10n.text("隐藏胶囊"),#selector(hideMenu))] {
+        for (title,selector) in [(L10n.text("查看 / 固定概览"),#selector(pinMenu)),(L10n.text("关闭概览"),#selector(closeMenu)),(L10n.text("刷新用量"),#selector(refreshMenu)),(L10n.text("自动续跑"),#selector(resumeMenu)),(L10n.text("设置"),#selector(settingsMenu)),(L10n.text("隐藏胶囊"),#selector(hideMenu))] {
             let item=NSMenuItem(title:title,action:selector,keyEquivalent:""); item.target=self; menu.addItem(item)
         }
         menu.addItem(.separator())
@@ -251,7 +254,7 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         if statusItem == nil { statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength) }
         statusItem.button?.image = NSImage(systemSymbolName:"chart.bar.xaxis",accessibilityDescription:L10n.text("用量胶囊"))
         let menu = NSMenu()
-        for (title,selector) in [(L10n.text("显示胶囊"),#selector(showWidget)),(L10n.text("固定概览"),#selector(pinMenu)),(L10n.text("关闭概览"),#selector(closeMenu)),(L10n.text("隐藏胶囊"),#selector(hideMenu)),(L10n.text("刷新用量"),#selector(refreshMenu)),(L10n.text("设置"),#selector(settingsMenu))] {
+        for (title,selector) in [(L10n.text("显示胶囊"),#selector(showWidget)),(L10n.text("固定概览"),#selector(pinMenu)),(L10n.text("关闭概览"),#selector(closeMenu)),(L10n.text("隐藏胶囊"),#selector(hideMenu)),(L10n.text("刷新用量"),#selector(refreshMenu)),(L10n.text("自动续跑"),#selector(resumeMenu)),(L10n.text("设置"),#selector(settingsMenu))] {
             let item = NSMenuItem(title:title,action:selector,keyEquivalent:""); item.target = self; menu.addItem(item)
         }
         menu.addItem(.separator())
@@ -265,6 +268,7 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     @objc func hideMenu() { hideWidget() }
     @objc func refreshMenu() { Task { await store.refresh() } }
     @objc func settingsMenu() { showSettings() }
+    @objc func resumeMenu() { showResumeSettings() }
     @objc func quitMenu() { NSApp.terminate(nil) }
     func applySettings() {
         UserDefaults.standard.set(store.language,forKey:"interfaceLanguage")
@@ -273,6 +277,7 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         installOverview(); installMenu()
         compact.title=L10n.text("用量胶囊"); overview.title=L10n.text("用量概览")
         settingsWindow?.title=L10n.text("用量胶囊设置")
+        resumeWindow?.title=L10n.text("自动续跑")
         DispatchQueue.main.async { [weak self] in
             guard let window=self?.settingsWindow, let content=window.contentView else { return }
             window.setContentSize(content.fittingSize)
@@ -286,6 +291,19 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
             window.title = L10n.text("用量胶囊设置"); window.contentView = hosting; window.setContentSize(hosting.fittingSize); window.isReleasedWhenClosed = false; window.center(); settingsWindow = window
         }
         NSApp.activate(ignoringOtherApps:true); settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+    func showResumeSettings() {
+        if resumeWindow == nil {
+            let window = NSWindow(contentRect:NSRect(x:0,y:0,width:430,height:520),styleMask:[.titled,.closable],backing:.buffered,defer:false)
+            window.title = L10n.text("自动续跑")
+            window.contentView = NSHostingView(rootView:ResumeSettingsView(store:store))
+            window.isReleasedWhenClosed = false
+            window.center()
+            resumeWindow = window
+        }
+        NSApp.activate(ignoringOtherApps:true)
+        resumeWindow?.makeKeyAndOrderFront(nil)
+        Task { await store.refresh(); await store.loadRecentThreads() }
     }
     func applicationWillTerminate(_ notification:Notification) {
         terminating = true; motionTask?.cancel(); hideTask?.cancel(); store.stop()
@@ -333,6 +351,7 @@ struct SettingsView: View {
             HStack { Text(L10n.text("常驻尺寸")); Slider(value:Binding(get:{store.scale},set:{store.scale = $0;apply()}),in:1...1.5,step:0.05); Text("\(Int(store.scale*100))%").monospacedDigit() }
             Text(L10n.text("按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。")).font(.caption).foregroundStyle(.secondary)
             HStack { Button(L10n.text("登录 Codex"),action:login); Button(L10n.text("立即刷新")) { Task { await store.refresh() } } }
+            Button(L10n.text("管理自动续跑")) { store.openResumeSettings?() }
             Text(L10n.text("重置卡仅在长按按钮后兑换。程序使用本机 Codex 登录，不需要 API Key。")).font(.caption).foregroundStyle(.secondary)
         }.padding(24).frame(width:380)
     }

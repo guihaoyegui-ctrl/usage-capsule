@@ -131,6 +131,15 @@ struct OverviewView: View {
                 quotaSection(store.secondary,label:L10n.text("周额"),now:context.date)
                 dailySection
                 resetSection
+                Button { store.openResumeSettings?() } label: {
+                    HStack(spacing:5) {
+                        Image(systemName:"play.circle")
+                        Text(L10n.text("自动续跑"))
+                        Spacer()
+                        Text(L10n.format("%@ 个任务",String(store.selectedResumeTasks.count)))
+                        Image(systemName:"chevron.right").font(.system(size:8))
+                    }.font(.system(size:10)).foregroundStyle(Forge.muted).padding(.vertical,3)
+                }.buttonStyle(.plain).disabled(store.demo)
                 footer
             }
             .padding(.horizontal,16).padding(.vertical,14).frame(width:248).frame(minHeight:324,alignment:.top)
