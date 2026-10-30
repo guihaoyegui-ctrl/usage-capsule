@@ -20,6 +20,8 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     var subscription: AnyCancellable?
     var settingsWindow: NSWindow?
     var resumeWindow: NSWindow?
+    var resumeNotifications: ResumeNotificationController?
+    var wakeObserver: NSObjectProtocol?
     var presentation = OverviewPresentation()
     let motion = OverviewMotion()
     var motionTask:Task<Void,Never>?
@@ -49,7 +51,14 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         installMenu()
         installDismissEvents()
         store.openResumeSettings = { [weak self] in self?.showResumeSettings() }
+        if !ProcessInfo.processInfo.arguments.contains("--demo") {
+            resumeNotifications = ResumeNotificationController(store:store)
+            resumeNotifications?.install()
+        }
         store.start()
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(forName:NSWorkspace.didWakeNotification,object:nil,queue:.main) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.store.requestAccountRefresh() }
+        }
         subscription = store.objectWillChange.sink { [weak self] in
             DispatchQueue.main.async { self?.resizeOverview(); self?.updateMenuTitle() }
         }
@@ -294,9 +303,10 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
     }
     func showResumeSettings() {
         if resumeWindow == nil {
-            let window = NSWindow(contentRect:NSRect(x:0,y:0,width:430,height:520),styleMask:[.titled,.closable],backing:.buffered,defer:false)
+            let window = NSWindow(contentRect:NSRect(x:0,y:0,width:480,height:650),styleMask:[.titled,.closable],backing:.buffered,defer:false)
             window.title = L10n.text("自动续跑")
             window.contentView = NSHostingView(rootView:ResumeSettingsView(store:store))
+            window.setContentSize(NSSize(width:480,height:650))
             window.isReleasedWhenClosed = false
             window.center()
             resumeWindow = window
@@ -309,7 +319,9 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         terminating = true; motionTask?.cancel(); hideTask?.cancel(); store.stop()
         if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
         if let clickMonitor { NSEvent.removeMonitor(clickMonitor) }
+        if let wakeObserver { NSWorkspace.shared.notificationCenter.removeObserver(wakeObserver) }
     }
+    func applicationDidBecomeActive(_ notification:Notification) { store.requestAccountRefresh() }
     func renderPreview() {
         store.loadDemo()
         store.scale = 1

@@ -2,14 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>%@ %@，周额 %@</key>
+	<string>%@ %@, weekly %@</string>
 	<key>%@ Token 消耗 %@</key>
 	<string>%@ token usage: %@</string>
+	<key>%@ · 上次确认</key>
+	<string>%@ · last verified</string>
+	<key>%@ · 待复核</key>
+	<string>%@ · rechecking</string>
 	<key>%@ 个任务</key>
 	<string>%@ tasks</string>
+	<key>%@ 分钟额度</key>
+	<string>%@ minute quota</string>
 	<key>%@ 天额度</key>
 	<string>%@-day quota</string>
 	<key>%@ 小时额度</key>
 	<string>%@-hour quota</string>
+	<key>%@ 项待恢复授权</key>
+	<string>%@ authorizations available</string>
+	<key>%@ 项有效授权</key>
+	<string>%@ active authorizations</string>
 	<key>%@可用 %@；下次重置 %@</key>
 	<string>%@ available: %@; resets %@</string>
 	<key>%@天 %@时</key>
@@ -28,14 +40,38 @@
 	<string>Codex disconnected. Refresh to reconnect.</string>
 	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
 	<string>The previous reset is unconfirmed. Hold to verify the same request.</string>
+	<key>也会在手动刷新、收到账号更新通知或电脑唤醒时检查；并非实时监控，不调用模型。</key>
+	<string>Also checks on manual refresh, account update events, or Mac wake. Polling is not real-time and does not call a model.</string>
+	<key>五小时不限额</key>
+	<string>No five-hour cap</string>
+	<key>仅恢复一次</key>
+	<string>Resume once</string>
+	<key>仅续跑一次</key>
+	<string>Resume once</string>
+	<key>仅表示本轮结束，请在原对话核对任务结果</key>
+	<string>This round ended. Check the original conversation for the task outcome.</string>
+	<key>仅表示没有五小时额度上限；周额度和其他实际限制仍然适用。</key>
+	<string>Only the five-hour cap is absent. Weekly and other actual limits still apply.</string>
 	<key>任务列表暂无法读取：%@</key>
 	<string>Task list unavailable: %@</string>
 	<key>任务已有排队消息，请在 Codex 查看</key>
 	<string>Task already has queued messages; check Codex</string>
 	<key>任务状态已变化，请在 Codex 查看</key>
 	<string>Task changed; check Codex</string>
+	<key>会员与用量 · 每 %@ 秒检查</key>
+	<string>Plan and usage · every %@s</string>
+	<key>会员待确认</key>
+	<string>Membership unconfirmed</string>
+	<key>会员等级来自本次账号用量读取；检测失败时保留上次确认标记，不猜测会员等级。</key>
+	<string>Plan comes from this account usage snapshot. A failed read marks the last verified plan; it never guesses your membership.</string>
+	<key>低于保留值时不再派发；无法限制已运行任务的实际消耗。</key>
+	<string>Stops new handoffs at the reserve. Running tasks can still use quota.</string>
 	<key>保持在其他窗口上方</key>
 	<string>Keep above other windows</string>
+	<key>保留周额</key>
+	<string>Weekly reserve</string>
+	<key>保留日额</key>
+	<string>5h reserve</string>
 	<key>停止结果待核实，请在 Codex 查看</key>
 	<string>Stop unconfirmed · check Codex</string>
 	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
@@ -52,10 +88,18 @@
 	<string>Refresh usage</string>
 	<key>加载更多</key>
 	<string>Load more</string>
+	<key>勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。</key>
+	<string>Checking authorizes the selected mode for future quota interruptions; cancel anytime.</string>
+	<key>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</key>
+	<string>Selecting authorizes one recovery after a future quota interruption. It does not start now or revive older failures.</string>
 	<key>取消</key>
 	<string>Cancel</string>
+	<key>取消全部授权</key>
+	<string>Revoke all</string>
 	<key>取消固定</key>
 	<string>Unpin overview</string>
+	<key>取消授权</key>
+	<string>Revoke</string>
 	<key>取消排队</key>
 	<string>Cancel queued</string>
 	<key>取消结果待核实，请在 Codex 查看</key>
@@ -84,24 +128,42 @@
 	<string>Not synced</string>
 	<key>已交给 Codex，请在原任务查看</key>
 	<string>Handed to Codex; open the original task</string>
+	<key>已交给 Codex；需要停止时请在原对话操作</key>
+	<string>Handed to Codex. Stop it in the original conversation if needed.</string>
+	<key>已停止新增交接；排队和正在执行的任务请分别取消或在原对话停止。</key>
+	<string>New handoffs are paused. Cancel queued items separately; stop running work in its original conversation.</string>
 	<key>已停止，请在 Codex 继续</key>
 	<string>Stopped · continue in Codex</string>
+	<key>已加载 %@ 项；搜索仅包含已加载的列表。</key>
+	<string>%@ loaded. Search covers loaded items only.</string>
 	<key>已取消排队</key>
 	<string>Queued continuation cancelled</string>
 	<key>已取消，未提交重置请求。</key>
 	<string>Cancelled. No reset request was submitted.</string>
+	<key>已授权一次，等待额度中断</key>
+	<string>One recovery authorized; monitoring</string>
+	<key>已授权任务</key>
+	<string>Authorized</string>
 	<key>已排队，等待 Codex 处理</key>
 	<string>Queued; waiting for Codex</string>
 	<key>已排队，请打开 Codex</key>
 	<string>Queued; open Codex</string>
 	<key>已核实</key>
 	<string>Reviewed</string>
+	<key>已核实，保留防重复记录</key>
+	<string>Verified; replay protection retained</string>
+	<key>已核实，放行下一项</key>
+	<string>Verified, allow next</string>
 	<key>已核实，清除</key>
 	<string>Reviewed, clear</string>
 	<key>已用 %@</key>
 	<string>Used %@</string>
+	<key>已由你核实并放行；任务进展请看原对话</key>
+	<string>You allowed the next item. Check this task in its original conversation.</string>
 	<key>已知数据合计</key>
 	<string>Known usage total</string>
+	<key>已确认撤回排队指令</key>
+	<string>Queue cancellation confirmed</string>
 	<key>已选中，等待额度中断</key>
 	<string>Selected · watching for quota interruption</string>
 	<key>已选任务</key>
@@ -112,18 +174,44 @@
 	<string>Widget size</string>
 	<key>当前可用：%@ 张</key>
 	<string>Cards available: %@</string>
+	<key>当前已加载列表中没有匹配任务</key>
+	<string>No matching loaded conversations</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>No eligible quota window to reset</string>
 	<key>待查询</key>
 	<string>Pending</string>
+	<key>恢复</key>
+	<string>Resume</string>
+	<key>恢复监测</key>
+	<string>Resume monitoring</string>
 	<key>打开重置确认，确认后才会使用重置卡</key>
 	<string>Opens reset confirmation. A card is used only after you explicitly confirm.</string>
+	<key>持续模式会在每次额度恢复后续跑；正常回复结束、等待你处理或其他错误不会自动开始新一轮。</key>
+	<string>Continuous mode recovers each quota interruption. Normal completion, owner input, or other errors never start another round.</string>
+	<key>持续监测 %@ 项 · %@</key>
+	<string>Monitoring %@ continuously · %@</string>
+	<key>持续监测，等待下次额度中断</key>
+	<string>Monitoring for the next quota interruption</string>
+	<key>持续续跑（不限次数）</key>
+	<string>Continuous (unlimited recoveries)</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>Drag anywhere to move. Hover to preview; click to pin. Close with × or Escape. Right-click or use the menu bar to quit. Usage refreshes every minute.</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
 	<string>Drag anywhere · Hover to preview · Click to pin · Right-click to quit</string>
+	<key>授权下一次</key>
+	<string>Authorize next recovery</string>
+	<key>授权：仅续跑一次</key>
+	<string>Authorize one recovery</string>
+	<key>授权：持续续跑（不限次数）</key>
+	<string>Authorize continuous quota recovery</string>
 	<key>提交结果待核实，请在 Codex 查看</key>
 	<string>Submission unconfirmed · check Codex</string>
+	<key>提高优先级</key>
+	<string>Move up</string>
+	<key>搜索已加载的任务或项目</key>
+	<string>Search loaded tasks or projects</string>
+	<key>新增任务的续跑模式</key>
+	<string>Mode for newly selected tasks</string>
 	<key>日用量暂无法读取：%@</key>
 	<string>Daily usage is unavailable: %@</string>
 	<key>日额</key>
@@ -134,10 +222,16 @@
 	<string>5-hour %@, weekly %@</string>
 	<key>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</key>
 	<string>5-hour quota · Drag anywhere · Click to pin · Right-click to quit</string>
+	<key>旧版选择，请确认单次授权</key>
+	<string>Legacy selection: confirm one recovery</string>
 	<key>显示胶囊</key>
 	<string>Show capsule</string>
 	<key>暂不可用</key>
 	<string>Unavailable</string>
+	<key>暂停</key>
+	<string>Pause</string>
+	<key>暂停续跑</key>
+	<string>Pause handoffs</string>
 	<key>暂无卡片</key>
 	<string>No cards</string>
 	<key>暂无可选任务，请登录 Codex 后刷新列表</key>
@@ -162,6 +256,8 @@
 	<string>Updated %@</string>
 	<key>更新失败，显示上次数据</key>
 	<string>Refresh failed; showing last data</string>
+	<key>最近额度更新</key>
+	<string>Quota last checked</string>
 	<key>服务未返回数据</key>
 	<string>The service returned no data</string>
 	<key>服务请求失败</key>
@@ -170,16 +266,28 @@
 	<string>Codex was not found. Install or open the Codex desktop app first.</string>
 	<key>本周额度</key>
 	<string>Weekly quota</string>
+	<key>本次授权已使用</key>
+	<string>Authorization used</string>
+	<key>本轮已结束</key>
+	<string>This round ended</string>
 	<key>本轮已结束，继续监测</key>
 	<string>Turn ended · monitoring</string>
+	<key>本轮结束或出错时通知</key>
+	<string>Notify when a round ends or fails</string>
+	<key>本轮遇到错误，后续自动交接已暂停</key>
+	<string>This round failed. Further handoffs are blocked.</string>
 	<key>查看 / 固定概览</key>
 	<string>Show / pin overview</string>
+	<key>核实后放行下一项</key>
+	<string>Inspect, then allow next</string>
 	<key>概览</key>
 	<string>Overview</string>
 	<key>正在加入 Codex 队列…</key>
 	<string>Adding to Codex queue…</string>
 	<key>正在恢复…</key>
 	<string>Resuming…</string>
+	<key>正在执行</key>
+	<string>Running</string>
 	<key>正在核实…</key>
 	<string>Verifying…</string>
 	<key>正在自动续跑</key>
@@ -208,6 +316,8 @@
 	<string>Use one card</string>
 	<key>确认使用重置卡？</key>
 	<string>Use a reset card?</string>
+	<key>确认放行下一项？</key>
+	<string>Allow the next item?</string>
 	<key>确认核实</key>
 	<string>Reconcile request</string>
 	<key>确认核实上次重置？</key>
@@ -216,28 +326,50 @@
 	<string>Demo data</string>
 	<key>立即刷新</key>
 	<string>Refresh now</string>
+	<key>等待 %@ · 排队 %@ · 执行 %@</key>
+	<string>Waiting %@ · Queued %@ · Running %@</string>
 	<key>等待原账号登录</key>
 	<string>Waiting for the original account</string>
 	<key>等待额度恢复</key>
 	<string>Waiting for quota recovery</string>
+	<key>等待额度高于保留值</key>
+	<string>Waiting for quota above reserve</string>
 	<key>管理自动续跑</key>
 	<string>Manage auto-resume</string>
+	<key>系统通知未开启，结果仍会保留在续跑记录中。</key>
+	<string>System notifications are off. Results remain in resume history.</string>
 	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
 	<string>The result is uncertain. Refresh to verify; retrying reuses this request.</string>
 	<key>续跑会消耗额度。请保持胶囊运行；无法确认中断原因时不会自动继续。已开始的任务可在 Codex 中停止，审批仍由你决定。</key>
 	<string>Continuations use quota. Keep the capsule running; unconfirmed interruptions are skipped. Stop started tasks in Codex, where you also decide approvals.</string>
 	<key>续跑会消耗额度。需保持胶囊运行；电脑休眠期间不执行。无法确认中断原因时不会自动继续；需要审批时会停下提示你。</key>
 	<string>Continuation uses quota. Keep the capsule running; it cannot work while your Mac sleeps. Unconfirmed interruption reasons are skipped. Approval requests pause for your attention.</string>
+	<key>续跑会消耗额度；仅在胶囊运行且电脑唤醒时检查。重置卡每次仍需你确认。</key>
+	<string>Resuming uses quota. Checks run while the capsule is open and the Mac is awake. Reset cards always require your confirmation.</string>
+	<key>续跑本轮已结束</key>
+	<string>Auto-resume: round ended</string>
+	<key>续跑模式</key>
+	<string>Resume mode</string>
+	<key>续跑管理</key>
+	<string>Resume manager</string>
+	<key>续跑规则与通知</key>
+	<string>Rules and notifications</string>
 	<key>续跑记录</key>
 	<string>Continuation history</string>
 	<key>续跑记录无法读取，请检查本机存储</key>
 	<string>Cannot read continuation records; check local storage</string>
+	<key>续跑需要你处理</key>
+	<string>Auto-resume needs your attention</string>
 	<key>自动续跑</key>
 	<string>Auto-resume</string>
+	<key>自动续跑已暂停</key>
+	<string>Auto-resume paused</string>
 	<key>设置</key>
 	<string>Settings</string>
 	<key>请先在 Codex 确认任务状态</key>
 	<string>First inspect the task in Codex</string>
+	<key>请先在原对话核实当前任务；放行不会停止它，下一项可能与它同时消耗额度。</key>
+	<string>Check the current task in its original conversation first. Allowing the next item will not stop it; both may use quota.</string>
 	<key>请在浏览器完成登录，然后刷新</key>
 	<string>Complete sign-in in the browser, then refresh</string>
 	<key>请求超时，请检查网络后刷新。</key>
@@ -250,12 +382,24 @@
 	<string>System default</string>
 	<key>近 7 天 Token</key>
 	<string>Tokens · Last 7 days</string>
+	<key>还没有授权任务</key>
+	<string>No authorized tasks yet</string>
+	<key>还没有续跑记录</key>
+	<string>No resume history yet</string>
+	<key>进展暂无法核实，请查看原对话</key>
+	<string>Progress unconfirmed; open the conversation</string>
 	<key>连接已断开</key>
 	<string>Disconnected</string>
 	<key>退出用量胶囊</key>
 	<string>Quit Usage Capsule</string>
+	<key>选好任务，额度恢复后继续一次。</key>
+	<string>Choose tasks. Resume once when quota returns.</string>
 	<key>选择任务</key>
 	<string>Choose tasks</string>
+	<key>选择单次或持续模式；额度恢复后接续原任务。</key>
+	<string>Choose once or continuous recovery for the original task.</string>
+	<key>通知暂不可用，请在续跑记录中查看结果。</key>
+	<string>Notifications unavailable. Check resume history for results.</string>
 	<key>重置 %@</key>
 	<string>Resets %@</string>
 	<key>重置卡 %@</key>
@@ -280,10 +424,18 @@
 	<string>Hold to verify the previous reset</string>
 	<key>长按确认</key>
 	<string>Hold to review</string>
+	<key>降低优先级</key>
+	<string>Move down</string>
 	<key>隐藏胶囊</key>
 	<string>Hide capsule</string>
+	<key>需要你核实，请打开原对话</key>
+	<string>Needs your review; open the conversation</string>
 	<key>需要你确认，请在 Codex 继续</key>
 	<string>Your input is needed · continue in Codex</string>
+	<key>预览</key>
+	<string>Preview</string>
+	<key>额度中断已确认；持续监测等待恢复</key>
+	<string>Quota interruption confirmed; monitoring recovery</string>
 	<key>额度窗口</key>
 	<string>Quota window</string>
 </dict>

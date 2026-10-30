@@ -96,6 +96,7 @@ import Foundation
         failures += await RefreshRecoveryTests.run()
         failures += await AutoResumeTests.run()
         failures += await NativeQueueTests.run()
+        failures += await ContinuousResumeTests.run()
         print("Reset confirmation and refresh recovery: \(failures) failures")
         if failures>0 { exit(1) }
     }

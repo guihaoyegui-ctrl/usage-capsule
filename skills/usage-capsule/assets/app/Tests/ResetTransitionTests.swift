@@ -34,6 +34,12 @@ import Foundation
         let bothOld = observation(time:1010,primary:window(300,1060),weekly:window(10080,1060))
         let bothNew = observation(time:1070,primary:window(300,19060),weekly:window(10080,605860))
         check(crossed(bothOld,bothNew) == [.fiveHour,.weekly],"detects simultaneous valid window resets")
+        let proOld = ResumeQuotaObservation(accountID:"account-a",observedAt:1010,primary:nil,weekly:window(10080,1060),planType:"pro",ordinaryUsageAllowed:true)
+        let proNew = ResumeQuotaObservation(accountID:"account-a",observedAt:1070,primary:nil,weekly:window(10080,605860),planType:"pro",ordinaryUsageAllowed:true)
+        check(crossed(proOld,proNew) == [.weekly],"Pro weekly-only observations can prove a weekly reset")
+        var upgraded = proNew
+        upgraded.planType = "plus"
+        check(crossed(proOld,upgraded).isEmpty,"an upgrade or downgrade cannot masquerade as a quota reset")
         check(crossed(nil).isEmpty,"missing previous observation cannot imply recovery")
         check(crossed(observation(account:"account-b",time:1010,primary:window(300,1060),weekly:window(10080,2000))).isEmpty,"account switch rejects old reset evidence")
         check(crossed(old,observation(account:"account-b",time:1070,primary:window(300,19060),weekly:window(10080,2000))).isEmpty,"current account must match the selected task")

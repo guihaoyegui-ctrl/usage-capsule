@@ -18,13 +18,74 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
     var state: HandoffState
     var hidden: Bool
     var ownerPID: Int32? = nil
+    var turnID: String? = nil
+    var turnStatus: String? = nil
+    var excerpt: String? = nil
+    var createdAt: Double? = nil
+    var endedAt: Double? = nil
+    var releasedAfterInspection: Bool? = nil
+    var notificationClaimed: Bool? = nil
+    var authorizationID: String? = nil
+    var quotaFailureConfirmed: Bool? = nil
     var id: String { clientMessageID }
+    var blocksDispatch: Bool {
+        state.unresolved || (state == .handedOff && turnStatus != "completed" && !(turnStatus == "failed" && quotaFailureConfirmed == true) && releasedAfterInspection != true)
+    }
+}
+
+struct ResumeReserve: Codable {
+    var primary: Double
+    var weekly: Double
+}
+private struct ResumeControls: Codable {
+    var paused = false
+    var reserves: [String:ResumeReserve] = [:]
+    var authorizations: [String:ResumeAuthorization]? = nil
+}
+private struct ResumeAuthorization: Codable {
+    var mode: ResumeMode? = nil
+    var grantedAt: Double? = nil
+    var threadID: String
+    var accountID: String
+    var state: String
 }
 
 @MainActor final class HandoffLedger {
     private let fileURL: URL
     private(set) var records: [HandoffRecord] = []
     private(set) var storageError: String?
+    private var controls = ResumeControls()
+    private var controlsURL: URL { fileURL.appendingPathExtension("controls.json") }
+    var paused: Bool { controls.paused }
+    func authorizationState(_ id:String?) -> String? { id.flatMap { controls.authorizations?[$0]?.state } }
+    func authorizationMode(_ id:String?) -> ResumeMode? { id.flatMap { controls.authorizations?[$0].map { $0.mode ?? .once } } }
+    @discardableResult func authorize(id:String,threadID:String,accountID:String,mode:ResumeMode = .once,grantedAt:Double = Date().timeIntervalSince1970) -> Bool {
+        guard !id.isEmpty, !threadID.isEmpty, !accountID.isEmpty, grantedAt.isFinite, grantedAt > 0 else { return false }
+        return locked(false) {
+            guard reload(convertSubmitting:false) else { return false }
+            if let existing = controls.authorizations?[id] {
+                return existing.threadID == threadID && existing.accountID == accountID && existing.state == "active" && (existing.mode ?? .once) == mode
+            }
+            // Replacement and grant share the dispatch lock. A delayed older
+            // intent must not replace a newer choice made in another bundle.
+            guard !(controls.authorizations ?? [:]).values.contains(where: { $0.threadID == threadID && ($0.grantedAt ?? 0) > grantedAt }) else { return false }
+            for (key,var authorization) in controls.authorizations ?? [:] where authorization.threadID == threadID {
+                authorization.state = "revoked"
+                controls.authorizations?[key] = authorization
+            }
+            if controls.authorizations == nil { controls.authorizations = [:] }
+            controls.authorizations?[id] = ResumeAuthorization(mode:mode,grantedAt:grantedAt,threadID:threadID,accountID:accountID,state:"active")
+            return persistControls()
+        }
+    }
+    @discardableResult func revokeAuthorizations(threadID:String) -> Bool {
+        changeControls { controls in
+            for (key,var authorization) in controls.authorizations ?? [:] where authorization.threadID == threadID {
+                authorization.state = "revoked"
+                controls.authorizations?[key] = authorization
+            }
+        }
+    }
     var storageCorrupted: Bool { storageError != nil }
 
     init(fileURL:URL? = nil) {
@@ -37,6 +98,39 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
     }
     var visibleRecords: [HandoffRecord] { records.filter { !$0.hidden } }
     var hasUnresolved: Bool { storageCorrupted || records.contains { $0.state.unresolved || Self.ownerIsAlive($0.ownerPID) } }
+    var hasDispatchBlocker: Bool { storageCorrupted || records.contains { $0.blocksDispatch || Self.ownerIsAlive($0.ownerPID) } }
+    func reserve(accountID:String) -> ResumeReserve { controls.reserves[accountID] ?? ResumeReserve(primary:0,weekly:0) }
+    func permitsDispatch(accountID:String,primary:Double?,weekly:Double?,quotaProfile:QuotaProfile? = nil) -> Bool {
+        let floor = reserve(accountID:accountID)
+        if let quotaProfile { return !storageCorrupted && !paused && quotaProfile.allowsResume(primaryReserve:floor.primary,weeklyReserve:floor.weekly) }
+        guard !storageCorrupted, !paused, let primary, let weekly, primary.isFinite, weekly.isFinite,
+              primary <= 100, weekly <= 100 else { return false }
+        return primary > floor.primary && weekly > floor.weekly
+    }
+    @discardableResult func setPaused(_ paused:Bool) -> Bool {
+        changeControls { $0.paused = paused }
+    }
+    @discardableResult func setReserve(accountID:String,primary:Double,weekly:Double) -> Bool {
+        guard !accountID.isEmpty, primary.isFinite, weekly.isFinite, (0...90).contains(primary), (0...90).contains(weekly) else { return false }
+        return changeControls { $0.reserves[accountID] = ResumeReserve(primary:primary,weekly:weekly) }
+    }
+    private func changeControls(_ update:(inout ResumeControls)->Void) -> Bool {
+        locked(false) {
+            guard reload(convertSubmitting:false) else { return false }
+            update(&controls)
+            return persistControls()
+        }
+    }
+    private func persistControls() -> Bool {
+        do {
+                try JSONEncoder().encode(controls).write(to:controlsURL,options:.atomic)
+                try FileManager.default.setAttributes([.posixPermissions:0o600],ofItemAtPath:controlsURL.path)
+                let handle = try FileHandle(forWritingTo:controlsURL)
+                defer { try? handle.close() }
+                try handle.synchronize()
+                return true
+        } catch { storageError = error.localizedDescription; return false }
+    }
     private static func ownerIsAlive(_ pid:Int32?) -> Bool {
         guard let pid, pid > 0 else { return false }
         if Darwin.kill(pid,0) == 0 { return true }
@@ -48,17 +142,29 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
 
     // Returns only after the intent and client ID are saved. Callers must not
     // send a request when this returns nil, including when storage is invalid.
-    func begin(threadID:String,accountID:String,title:String,failedTurnID:String) -> HandoffRecord? {
+    func begin(threadID:String,accountID:String,title:String,failedTurnID:String,primaryRemaining:Double? = nil,weeklyRemaining:Double? = nil,authorizationID:String? = nil,quotaProfile:QuotaProfile? = nil) -> HandoffRecord? {
         guard !storageCorrupted, !threadID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,
               !accountID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,
               !failedTurnID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return nil }
         return locked(nil as HandoffRecord?) {
-            guard reload(convertSubmitting:false), !hasUnresolved,
+            guard reload(convertSubmitting:false), !paused, !hasDispatchBlocker,
                   !records.contains(where: { $0.threadID == threadID && $0.accountID == accountID && $0.failedTurnID == failedTurnID }) else { return nil }
+            if let authorizationID {
+                guard let authorization = controls.authorizations?[authorizationID], authorization.state == "active",
+                      authorization.threadID == threadID, authorization.accountID == accountID,
+                      ((authorization.mode ?? .once) == .continuous || !records.contains(where: { $0.authorizationID == authorizationID })) else { return nil }
+            }
+            if primaryRemaining != nil || weeklyRemaining != nil || quotaProfile != nil {
+                guard permitsDispatch(accountID:accountID,primary:primaryRemaining,weekly:weeklyRemaining,quotaProfile:quotaProfile) else { return nil }
+            }
             let item = HandoffRecord(threadID:threadID,accountID:accountID,title:title,failedTurnID:failedTurnID,
-                                     clientMessageID:UUID().uuidString.lowercased(),queueID:nil,state:.submitting,hidden:false,ownerPID:Darwin.getpid())
+                                     clientMessageID:UUID().uuidString.lowercased(),queueID:nil,state:.submitting,hidden:false,ownerPID:Darwin.getpid(),createdAt:Date().timeIntervalSince1970,authorizationID:authorizationID)
             records.append(item)
             guard persist() else { records.removeLast(); return nil }
+            if let authorizationID, controls.authorizations?[authorizationID]?.mode != .continuous {
+                controls.authorizations?[authorizationID]?.state = "consumed"
+                guard persistControls() else { return nil }
+            }
             return item
         }
     }
@@ -91,6 +197,35 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
             return true
         }
     }
+    @discardableResult func updateProgress(clientMessageID:String,turnID:String,status:String,excerpt:String?,endedAt:Double?,quotaFailureConfirmed:Bool = false) -> Bool {
+        guard !turnID.isEmpty, ["inProgress","completed","failed","interrupted"].contains(status) else { return false }
+        return change(clientMessageID) { item in
+            guard item.state == .handedOff, item.turnID == nil || item.turnID == turnID else { return false }
+            // A stale reader cannot undo an already confirmed terminal result.
+            if item.turnStatus == "completed" { return status == "completed" }
+            if item.turnStatus == "failed" && item.quotaFailureConfirmed == true { return status == "failed" && quotaFailureConfirmed }
+            item.turnID = turnID; item.turnStatus = status
+            item.excerpt = excerpt.map { String($0.prefix(240)) }
+            item.endedAt = endedAt
+            item.quotaFailureConfirmed = quotaFailureConfirmed && status == "failed" && endedAt.map { $0.isFinite && $0 > 0 && $0 <= Date().timeIntervalSince1970 + 5 } == true && authorizationMode(item.authorizationID) == .continuous
+            return true
+        }
+    }
+    @discardableResult func releaseAfterInspection(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .handedOff, !Self.ownerIsAlive(item.ownerPID) else { return false }
+            item.releasedAfterInspection = true
+            return true
+        }
+    }
+    @discardableResult func claimNotification(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .handedOff, ["completed","failed","interrupted"].contains(item.turnStatus ?? ""),
+                  item.notificationClaimed != true else { return false }
+            item.notificationClaimed = true
+            return true
+        }
+    }
     // The caller must verify deletion from Codex's queue first.
     @discardableResult func markCancelled(clientMessageID:String) -> Bool {
         change(clientMessageID) { item in
@@ -118,7 +253,7 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
     }
     @discardableResult func dismissResolved(clientMessageID:String) -> Bool {
         change(clientMessageID) { item in
-            guard !item.state.unresolved, !Self.ownerIsAlive(item.ownerPID) else { return false }
+            guard !item.blocksDispatch, !Self.ownerIsAlive(item.ownerPID) else { return false }
             item.hidden = true
             return true
         }
@@ -153,6 +288,12 @@ struct HandoffRecord: Codable, Identifiable, Equatable {
     }
     private func reload(convertSubmitting:Bool) -> Bool {
         do {
+            do { controls = try JSONDecoder().decode(ResumeControls.self,from:Data(contentsOf:controlsURL)) }
+            catch {
+                let issue = error as NSError
+                guard issue.domain == NSCocoaErrorDomain && issue.code == NSFileReadNoSuchFileError else { throw error }
+                controls = ResumeControls()
+            }
             let data = try Data(contentsOf:fileURL)
             records = try JSONDecoder().decode([HandoffRecord].self,from:data)
             var changed = false

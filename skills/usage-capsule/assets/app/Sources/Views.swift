@@ -74,8 +74,15 @@ struct CompactView: View {
     var menu:()->NSMenu
     var body: some View {
         CapsuleInteraction(
-            content:AnyView(CapsuleFace(primary:store.primary?.remaining,weekly:store.secondary?.remaining,scale:CGFloat(store.scale)).accessibilityHidden(true).padding(8)),
-            label:L10n.format("日额 %@，周额 %@", String(describing: (percentLabel(store.primary?.remaining))), String(describing: (percentLabel(store.secondary?.remaining)))),
+            content:AnyView(CapsuleFace(primary:store.displayedPrimary?.remaining,weekly:store.secondary?.remaining,scale:CGFloat(store.scale),primaryUnlimited:store.primaryUnlimited,primaryLabel:store.displayedPrimaryLabel)
+                .overlay(alignment:.topTrailing) {
+                    if store.resumeNeedsDot {
+                        Circle().fill(store.resumeOverviewStage == .review ? Forge.amber : Forge.text.opacity(0.8))
+                            .frame(width:4*store.scale,height:4*store.scale).padding(.top,11*store.scale).padding(.trailing,25*store.scale)
+                            .allowsHitTesting(false)
+                    }
+                }.accessibilityHidden(true).padding(8)),
+            label:L10n.format("%@ %@，周额 %@",store.displayedPrimaryLabel,store.primaryUnlimited ? "∞" : percentLabel(store.displayedPrimary?.remaining),percentLabel(store.secondary?.remaining)),
             hover:hover,press:click,dragChanged:dragChanged,menu:menu)
             .frame(width:184*store.scale+16,height:60*store.scale+16)
     }
@@ -85,9 +92,11 @@ struct CapsuleFace:View {
     var primary:Double?
     var weekly:Double?
     var scale:CGFloat = 1
+    var primaryUnlimited = false
+    var primaryLabel:String? = nil
     var body:some View {
         HStack(spacing:11*scale) {
-            reading(primary,label:L10n.text("日额"))
+            reading(primary,label:primaryLabel ?? L10n.text("日额"),unlimited:primaryUnlimited)
             Rectangle().fill(LinearGradient(colors:[.clear,.white.opacity(0.23),.clear],startPoint:.top,endPoint:.bottom)).frame(width:0.5,height:34*scale)
             reading(weekly,label:L10n.text("周额"))
         }
@@ -97,15 +106,17 @@ struct CapsuleFace:View {
         .shadow(color:.black.opacity(0.23),radius:3,y:3)
         .foregroundStyle(Forge.text)
     }
-    private func reading(_ remaining:Double?,label:String) -> some View {
+    private func reading(_ remaining:Double?,label:String,unlimited:Bool = false) -> some View {
         VStack(alignment:.leading,spacing:2.5*scale) {
             Text(label).font(.system(size:8*scale,weight:.medium)).foregroundStyle(Forge.text.opacity(0.73))
             HStack(alignment:.firstTextBaseline,spacing:1*scale) {
-                Text(remaining.map { String(format:"%.0f",$0) } ?? "—")
-                    .font(.system(size:23*scale,weight:.semibold)).monospacedDigit().tracking(-0.6*scale)
-                if remaining != nil { Text("%").font(.system(size:11*scale,weight:.medium)).foregroundStyle(Forge.text.opacity(0.90)) }
+                Text(unlimited ? "∞" : (remaining.map { String(format:"%.0f",$0) } ?? "—"))
+                    .font(.system(size:(unlimited ? 28 : 23)*scale,weight:.semibold)).monospacedDigit().tracking(-0.6*scale)
+                if remaining != nil && !unlimited { Text("%").font(.system(size:11*scale,weight:.medium)).foregroundStyle(Forge.text.opacity(0.90)) }
             }.frame(height:23*scale,alignment:.leading)
-            BatteryBar(remaining:remaining,height:3.7*scale,scale:scale)
+            if unlimited {
+                Capsule().fill(LinearGradient(colors:[Forge.amber,Forge.orange.opacity(0.2)],startPoint:.leading,endPoint:.trailing)).frame(width:40*scale,height:1.5*scale).frame(height:3.7*scale)
+            } else { BatteryBar(remaining:remaining,height:3.7*scale,scale:scale) }
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
 }
@@ -119,6 +130,9 @@ struct OverviewView: View {
         TimelineView(.periodic(from:Date(),by:1)) { context in
             VStack(alignment:.leading,spacing:7) {
                 header
+                Text(L10n.format("会员与用量 · 每 %@ 秒检查",String(Int(QuotaStore.refreshInterval))))
+                    .font(.system(size:8.5)).foregroundStyle(Forge.muted)
+                    .help(L10n.text("也会在手动刷新、收到账号更新通知或电脑唤醒时检查；并非实时监控，不调用模型。"))
                 if let error = store.error {
                     HStack(alignment:.top,spacing:5) {
                         Image(systemName:"wifi.exclamationmark")
@@ -127,19 +141,36 @@ struct OverviewView: View {
                         Button(L10n.text("登录")) { Task { await store.login() } }.buttonStyle(.plain).foregroundStyle(Forge.amber)
                     }.font(.system(size:10)).foregroundStyle(Forge.muted).help(error)
                 }
-                quotaSection(store.primary,label:L10n.text("日额"),now:context.date)
+                if store.primaryUnlimited { unlimitedSection }
+                else { quotaSection(store.displayedPrimary,label:store.displayedPrimaryLabel,now:context.date) }
                 quotaSection(store.secondary,label:L10n.text("周额"),now:context.date)
+                ForEach(Array((store.limits?.quotaProfile.otherWindows ?? []).dropFirst(store.primary == nil && !store.primaryUnlimited ? 1 : 0).enumerated()),id:\.offset) { _,window in
+                    quotaSection(window,label:window.title,now:context.date)
+                }
                 dailySection
                 resetSection
-                Button { store.openResumeSettings?() } label: {
+                VStack(alignment:.leading,spacing:5) {
+                  Button { store.openResumeSettings?() } label: {
                     HStack(spacing:5) {
-                        Image(systemName:"play.circle")
+                        Image(systemName:store.resumeOverviewStage.symbol)
                         Text(L10n.text("自动续跑"))
                         Spacer()
-                        Text(L10n.format("%@ 个任务",String(store.selectedResumeTasks.count)))
+                        Text(L10n.format("%@ 个任务",String(store.activeResumeSelections.count)))
                         Image(systemName:"chevron.right").font(.system(size:8))
                     }.font(.system(size:10)).foregroundStyle(Forge.muted).padding(.vertical,3)
-                }.buttonStyle(.plain).disabled(store.demo)
+                  }.buttonStyle(.plain).disabled(store.demo)
+                  if store.resumeNeedsDot || store.resumeIsPaused {
+                    HStack(spacing:4) {
+                        Text(store.resumeOverviewStage == .review ? L10n.text("需要你核实，请打开原对话") : store.resumeSummary).lineLimit(1)
+                        Spacer(minLength:0)
+                        Button(store.resumeIsPaused ? L10n.text("恢复") : L10n.text("暂停")) { store.setResumePaused(!store.resumeIsPaused) }
+                            .buttonStyle(.plain).foregroundStyle(Forge.amber)
+                    }.font(.system(size:9)).foregroundStyle(Forge.muted)
+                    if let next = store.activeResumeSelections.first {
+                        Text(next.title).font(.system(size:9)).lineLimit(1).foregroundStyle(Forge.muted).help(next.title)
+                    }
+                  }
+                }
                 footer
             }
             .padding(.horizontal,16).padding(.vertical,14).frame(width:248).frame(minHeight:324,alignment:.top)
@@ -151,6 +182,10 @@ struct OverviewView: View {
     private var header:some View {
         HStack(spacing:4) {
             Text(L10n.text("概览")).font(.system(size:14,weight:.medium))
+            Text(store.membershipLabel).font(.system(size:9,weight:.medium)).lineLimit(1).minimumScaleFactor(0.75)
+                .foregroundStyle(Forge.amber).padding(.horizontal,6).padding(.vertical,3)
+                .background(Forge.amber.opacity(0.10),in:Capsule())
+                .help(L10n.text("会员等级来自本次账号用量读取；检测失败时保留上次确认标记，不猜测会员等级。"))
             Spacer()
             icon(store.pinned ? "pin.fill" : "pin",label:store.pinned ? L10n.text("取消固定") : L10n.text("固定概览"),action:onPin)
                 .foregroundStyle(store.pinned ? Forge.amber : Forge.muted)
@@ -163,6 +198,16 @@ struct OverviewView: View {
         Button(action:action) {
             Image(systemName:name).font(.system(size:10,weight:.medium)).frame(width:21,height:22).contentShape(Rectangle())
         }.buttonStyle(.plain).foregroundStyle(Forge.muted).help(label).accessibilityLabel(label)
+    }
+    private var unlimitedSection:some View {
+        VStack(alignment:.leading,spacing:5) {
+            HStack(alignment:.firstTextBaseline) {
+                Text(L10n.text("日额")).font(.system(size:12,weight:.medium))
+                Spacer()
+                Text("∞").font(.system(size:25,weight:.medium)).foregroundStyle(Forge.text)
+            }
+            Text(L10n.text("五小时不限额")).font(.system(size:9)).foregroundStyle(Forge.muted)
+        }.help(L10n.text("仅表示没有五小时额度上限；周额度和其他实际限制仍然适用。"))
     }
     private func quotaSection(_ window:QuotaWindow?,label:String,now:Date) -> some View {
         VStack(alignment:.leading,spacing:5) {
@@ -177,7 +222,7 @@ struct OverviewView: View {
                 Spacer(minLength:0)
                 Text(L10n.format("已用 %@", String(describing: (percentLabel(window?.usedPercent)))))
             }.font(.system(size:9)).monospacedDigit().foregroundStyle(Forge.muted)
-            if label == L10n.text("日额") {
+            if window?.windowDurationMins == 300 {
                 Text(L10n.format("5 小时窗口 · 距重置 %@", String(describing: (countdown(window,now:now)))))
                     .font(.system(size:9)).monospacedDigit().foregroundStyle(Forge.muted)
             }

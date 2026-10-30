@@ -2,14 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>%@ %@，周额 %@</key>
+	<string>%@ %@，周额 %@</string>
 	<key>%@ Token 消耗 %@</key>
 	<string>%@ Token 消耗 %@</string>
+	<key>%@ · 上次确认</key>
+	<string>%@ · 上次确认</string>
+	<key>%@ · 待复核</key>
+	<string>%@ · 待复核</string>
 	<key>%@ 个任务</key>
 	<string>%@ 个任务</string>
+	<key>%@ 分钟额度</key>
+	<string>%@ 分钟额度</string>
 	<key>%@ 天额度</key>
 	<string>%@ 天额度</string>
 	<key>%@ 小时额度</key>
 	<string>%@ 小时额度</string>
+	<key>%@ 项待恢复授权</key>
+	<string>%@ 项待恢复授权</string>
+	<key>%@ 项有效授权</key>
+	<string>%@ 项有效授权</string>
 	<key>%@可用 %@；下次重置 %@</key>
 	<string>%@可用 %@；下次重置 %@</string>
 	<key>%@天 %@时</key>
@@ -28,14 +40,38 @@
 	<string>Codex 连接已关闭，请重试刷新。</string>
 	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
 	<string>上次兑换待核实，长按按钮可核实同一次兑换。</string>
+	<key>也会在手动刷新、收到账号更新通知或电脑唤醒时检查；并非实时监控，不调用模型。</key>
+	<string>也会在手动刷新、收到账号更新通知或电脑唤醒时检查；并非实时监控，不调用模型。</string>
+	<key>五小时不限额</key>
+	<string>五小时不限额</string>
+	<key>仅恢复一次</key>
+	<string>仅恢复一次</string>
+	<key>仅续跑一次</key>
+	<string>仅续跑一次</string>
+	<key>仅表示本轮结束，请在原对话核对任务结果</key>
+	<string>仅表示本轮结束，请在原对话核对任务结果</string>
+	<key>仅表示没有五小时额度上限；周额度和其他实际限制仍然适用。</key>
+	<string>仅表示没有五小时额度上限；周额度和其他实际限制仍然适用。</string>
 	<key>任务列表暂无法读取：%@</key>
 	<string>任务列表暂无法读取：%@</string>
 	<key>任务已有排队消息，请在 Codex 查看</key>
 	<string>任务已有排队消息，请在 Codex 查看</string>
 	<key>任务状态已变化，请在 Codex 查看</key>
 	<string>任务状态已变化，请在 Codex 查看</string>
+	<key>会员与用量 · 每 %@ 秒检查</key>
+	<string>会员与用量 · 每 %@ 秒检查</string>
+	<key>会员待确认</key>
+	<string>会员待确认</string>
+	<key>会员等级来自本次账号用量读取；检测失败时保留上次确认标记，不猜测会员等级。</key>
+	<string>会员等级来自本次账号用量读取；检测失败时保留上次确认标记，不猜测会员等级。</string>
+	<key>低于保留值时不再派发；无法限制已运行任务的实际消耗。</key>
+	<string>低于保留值时不再派发；无法限制已运行任务的实际消耗。</string>
 	<key>保持在其他窗口上方</key>
 	<string>保持在其他窗口上方</string>
+	<key>保留周额</key>
+	<string>保留周额</string>
+	<key>保留日额</key>
+	<string>保留日额</string>
 	<key>停止结果待核实，请在 Codex 查看</key>
 	<string>停止结果待核实，请在 Codex 查看</string>
 	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
@@ -52,10 +88,18 @@
 	<string>刷新用量</string>
 	<key>加载更多</key>
 	<string>加载更多</string>
+	<key>勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。</key>
+	<string>勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。</string>
+	<key>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</key>
+	<string>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</string>
 	<key>取消</key>
 	<string>取消</string>
+	<key>取消全部授权</key>
+	<string>取消全部授权</string>
 	<key>取消固定</key>
 	<string>取消固定</string>
+	<key>取消授权</key>
+	<string>取消授权</string>
 	<key>取消排队</key>
 	<string>取消排队</string>
 	<key>取消结果待核实，请在 Codex 查看</key>
@@ -84,24 +128,42 @@
 	<string>尚未同步</string>
 	<key>已交给 Codex，请在原任务查看</key>
 	<string>已交给 Codex，请在原任务查看</string>
+	<key>已交给 Codex；需要停止时请在原对话操作</key>
+	<string>已交给 Codex；需要停止时请在原对话操作</string>
+	<key>已停止新增交接；排队和正在执行的任务请分别取消或在原对话停止。</key>
+	<string>已停止新增交接；排队和正在执行的任务请分别取消或在原对话停止。</string>
 	<key>已停止，请在 Codex 继续</key>
 	<string>已停止，请在 Codex 继续</string>
+	<key>已加载 %@ 项；搜索仅包含已加载的列表。</key>
+	<string>已加载 %@ 项；搜索仅包含已加载的列表。</string>
 	<key>已取消排队</key>
 	<string>已取消排队</string>
 	<key>已取消，未提交重置请求。</key>
 	<string>已取消，未提交重置请求。</string>
+	<key>已授权一次，等待额度中断</key>
+	<string>已授权一次，等待额度中断</string>
+	<key>已授权任务</key>
+	<string>已授权任务</string>
 	<key>已排队，等待 Codex 处理</key>
 	<string>已排队，等待 Codex 处理</string>
 	<key>已排队，请打开 Codex</key>
 	<string>已排队，请打开 Codex</string>
 	<key>已核实</key>
 	<string>已核实</string>
+	<key>已核实，保留防重复记录</key>
+	<string>已核实，保留防重复记录</string>
+	<key>已核实，放行下一项</key>
+	<string>已核实，放行下一项</string>
 	<key>已核实，清除</key>
 	<string>已核实，清除</string>
 	<key>已用 %@</key>
 	<string>已用 %@</string>
+	<key>已由你核实并放行；任务进展请看原对话</key>
+	<string>已由你核实并放行；任务进展请看原对话</string>
 	<key>已知数据合计</key>
 	<string>已知数据合计</string>
+	<key>已确认撤回排队指令</key>
+	<string>已确认撤回排队指令</string>
 	<key>已选中，等待额度中断</key>
 	<string>已选中，等待额度中断</string>
 	<key>已选任务</key>
@@ -112,18 +174,44 @@
 	<string>常驻尺寸</string>
 	<key>当前可用：%@ 张</key>
 	<string>当前可用：%@ 张</string>
+	<key>当前已加载列表中没有匹配任务</key>
+	<string>当前已加载列表中没有匹配任务</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>当前没有可重置的额度窗口</string>
 	<key>待查询</key>
 	<string>待查询</string>
+	<key>恢复</key>
+	<string>恢复</string>
+	<key>恢复监测</key>
+	<string>恢复监测</string>
 	<key>打开重置确认，确认后才会使用重置卡</key>
 	<string>打开重置确认，确认后才会使用重置卡</string>
+	<key>持续模式会在每次额度恢复后续跑；正常回复结束、等待你处理或其他错误不会自动开始新一轮。</key>
+	<string>持续模式会在每次额度恢复后续跑；正常回复结束、等待你处理或其他错误不会自动开始新一轮。</string>
+	<key>持续监测 %@ 项 · %@</key>
+	<string>持续监测 %@ 项 · %@</string>
+	<key>持续监测，等待下次额度中断</key>
+	<string>持续监测，等待下次额度中断</string>
+	<key>持续续跑（不限次数）</key>
+	<string>持续续跑（不限次数）</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
 	<string>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</string>
+	<key>授权下一次</key>
+	<string>授权下一次</string>
+	<key>授权：仅续跑一次</key>
+	<string>授权：仅续跑一次</string>
+	<key>授权：持续续跑（不限次数）</key>
+	<string>授权：持续续跑（不限次数）</string>
 	<key>提交结果待核实，请在 Codex 查看</key>
 	<string>提交结果待核实，请在 Codex 查看</string>
+	<key>提高优先级</key>
+	<string>提高优先级</string>
+	<key>搜索已加载的任务或项目</key>
+	<string>搜索已加载的任务或项目</string>
+	<key>新增任务的续跑模式</key>
+	<string>新增任务的续跑模式</string>
 	<key>日用量暂无法读取：%@</key>
 	<string>日用量暂无法读取：%@</string>
 	<key>日额</key>
@@ -134,10 +222,16 @@
 	<string>日额 %@，周额 %@</string>
 	<key>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</key>
 	<string>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</string>
+	<key>旧版选择，请确认单次授权</key>
+	<string>旧版选择，请确认单次授权</string>
 	<key>显示胶囊</key>
 	<string>显示胶囊</string>
 	<key>暂不可用</key>
 	<string>暂不可用</string>
+	<key>暂停</key>
+	<string>暂停</string>
+	<key>暂停续跑</key>
+	<string>暂停续跑</string>
 	<key>暂无卡片</key>
 	<string>暂无卡片</string>
 	<key>暂无可选任务，请登录 Codex 后刷新列表</key>
@@ -162,6 +256,8 @@
 	<string>更新于 %@</string>
 	<key>更新失败，显示上次数据</key>
 	<string>更新失败，显示上次数据</string>
+	<key>最近额度更新</key>
+	<string>最近额度更新</string>
 	<key>服务未返回数据</key>
 	<string>服务未返回数据</string>
 	<key>服务请求失败</key>
@@ -170,16 +266,28 @@
 	<string>未找到 Codex，请先安装或打开 Codex 桌面应用。</string>
 	<key>本周额度</key>
 	<string>本周额度</string>
+	<key>本次授权已使用</key>
+	<string>本次授权已使用</string>
+	<key>本轮已结束</key>
+	<string>本轮已结束</string>
 	<key>本轮已结束，继续监测</key>
 	<string>本轮已结束，继续监测</string>
+	<key>本轮结束或出错时通知</key>
+	<string>本轮结束或出错时通知</string>
+	<key>本轮遇到错误，后续自动交接已暂停</key>
+	<string>本轮遇到错误，后续自动交接已暂停</string>
 	<key>查看 / 固定概览</key>
 	<string>查看 / 固定概览</string>
+	<key>核实后放行下一项</key>
+	<string>核实后放行下一项</string>
 	<key>概览</key>
 	<string>概览</string>
 	<key>正在加入 Codex 队列…</key>
 	<string>正在加入 Codex 队列…</string>
 	<key>正在恢复…</key>
 	<string>正在恢复…</string>
+	<key>正在执行</key>
+	<string>正在执行</string>
 	<key>正在核实…</key>
 	<string>正在核实…</string>
 	<key>正在自动续跑</key>
@@ -208,6 +316,8 @@
 	<string>确认使用</string>
 	<key>确认使用重置卡？</key>
 	<string>确认使用重置卡？</string>
+	<key>确认放行下一项？</key>
+	<string>确认放行下一项？</string>
 	<key>确认核实</key>
 	<string>确认核实</string>
 	<key>确认核实上次重置？</key>
@@ -216,28 +326,50 @@
 	<string>示例数据</string>
 	<key>立即刷新</key>
 	<string>立即刷新</string>
+	<key>等待 %@ · 排队 %@ · 执行 %@</key>
+	<string>等待 %@ · 排队 %@ · 执行 %@</string>
 	<key>等待原账号登录</key>
 	<string>等待原账号登录</string>
 	<key>等待额度恢复</key>
 	<string>等待额度恢复</string>
+	<key>等待额度高于保留值</key>
+	<string>等待额度高于保留值</string>
 	<key>管理自动续跑</key>
 	<string>管理自动续跑</string>
+	<key>系统通知未开启，结果仍会保留在续跑记录中。</key>
+	<string>系统通知未开启，结果仍会保留在续跑记录中。</string>
 	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
 	<string>结果暂不明确，请刷新核实；再次使用会复用本次请求。</string>
 	<key>续跑会消耗额度。请保持胶囊运行；无法确认中断原因时不会自动继续。已开始的任务可在 Codex 中停止，审批仍由你决定。</key>
 	<string>续跑会消耗额度。请保持胶囊运行；无法确认中断原因时不会自动继续。已开始的任务可在 Codex 中停止，审批仍由你决定。</string>
 	<key>续跑会消耗额度。需保持胶囊运行；电脑休眠期间不执行。无法确认中断原因时不会自动继续；需要审批时会停下提示你。</key>
 	<string>续跑会消耗额度。需保持胶囊运行；电脑休眠期间不执行。无法确认中断原因时不会自动继续；需要审批时会停下提示你。</string>
+	<key>续跑会消耗额度；仅在胶囊运行且电脑唤醒时检查。重置卡每次仍需你确认。</key>
+	<string>续跑会消耗额度；仅在胶囊运行且电脑唤醒时检查。重置卡每次仍需你确认。</string>
+	<key>续跑本轮已结束</key>
+	<string>续跑本轮已结束</string>
+	<key>续跑模式</key>
+	<string>续跑模式</string>
+	<key>续跑管理</key>
+	<string>续跑管理</string>
+	<key>续跑规则与通知</key>
+	<string>续跑规则与通知</string>
 	<key>续跑记录</key>
 	<string>续跑记录</string>
 	<key>续跑记录无法读取，请检查本机存储</key>
 	<string>续跑记录无法读取，请检查本机存储</string>
+	<key>续跑需要你处理</key>
+	<string>续跑需要你处理</string>
 	<key>自动续跑</key>
 	<string>自动续跑</string>
+	<key>自动续跑已暂停</key>
+	<string>自动续跑已暂停</string>
 	<key>设置</key>
 	<string>设置</string>
 	<key>请先在 Codex 确认任务状态</key>
 	<string>请先在 Codex 确认任务状态</string>
+	<key>请先在原对话核实当前任务；放行不会停止它，下一项可能与它同时消耗额度。</key>
+	<string>请先在原对话核实当前任务；放行不会停止它，下一项可能与它同时消耗额度。</string>
 	<key>请在浏览器完成登录，然后刷新</key>
 	<string>请在浏览器完成登录，然后刷新</string>
 	<key>请求超时，请检查网络后刷新。</key>
@@ -250,12 +382,24 @@
 	<string>跟随系统</string>
 	<key>近 7 天 Token</key>
 	<string>近 7 天 Token</string>
+	<key>还没有授权任务</key>
+	<string>还没有授权任务</string>
+	<key>还没有续跑记录</key>
+	<string>还没有续跑记录</string>
+	<key>进展暂无法核实，请查看原对话</key>
+	<string>进展暂无法核实，请查看原对话</string>
 	<key>连接已断开</key>
 	<string>连接已断开</string>
 	<key>退出用量胶囊</key>
 	<string>退出用量胶囊</string>
+	<key>选好任务，额度恢复后继续一次。</key>
+	<string>选好任务，额度恢复后继续一次。</string>
 	<key>选择任务</key>
 	<string>选择任务</string>
+	<key>选择单次或持续模式；额度恢复后接续原任务。</key>
+	<string>选择单次或持续模式；额度恢复后接续原任务。</string>
+	<key>通知暂不可用，请在续跑记录中查看结果。</key>
+	<string>通知暂不可用，请在续跑记录中查看结果。</string>
 	<key>重置 %@</key>
 	<string>重置 %@</string>
 	<key>重置卡 %@</key>
@@ -280,10 +424,18 @@
 	<string>长按核实上次兑换</string>
 	<key>长按确认</key>
 	<string>长按确认</string>
+	<key>降低优先级</key>
+	<string>降低优先级</string>
 	<key>隐藏胶囊</key>
 	<string>隐藏胶囊</string>
+	<key>需要你核实，请打开原对话</key>
+	<string>需要你核实，请打开原对话</string>
 	<key>需要你确认，请在 Codex 继续</key>
 	<string>需要你确认，请在 Codex 继续</string>
+	<key>预览</key>
+	<string>预览</string>
+	<key>额度中断已确认；持续监测等待恢复</key>
+	<string>额度中断已确认；持续监测等待恢复</string>
 	<key>额度窗口</key>
 	<string>额度窗口</string>
 </dict>

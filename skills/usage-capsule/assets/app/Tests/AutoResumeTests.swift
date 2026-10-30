@@ -27,10 +27,23 @@ import Foundation
         ledger.markDispatched(threadID:"thread-a",turnID:"turn-1")
         check(!resumeEligible(ledger.selections[0],accountID:"account-a",turn:failed,primaryRemaining:68,weeklyRemaining:42),"same failed turn cannot dispatch twice")
         check(!resumeEligible(ResumeLedger(defaults:defaults).selections[0],accountID:"account-a",turn:failed,primaryRemaining:68,weeklyRemaining:42),"dispatch marker survives crash or timeout")
+        ledger.waitForReset(threadID:"thread-a",turnID:"turn-2")
+        check(!resumeEligible(ledger.selections[0],accountID:"account-a",turn:ResumeTurn(id:"turn-2",status:"failed",errorCode:"usageLimitExceeded"),primaryRemaining:68,weeklyRemaining:42),"one authorization cannot recover a second quota failure")
         ledger.remove(threadID:"thread-a")
         check(ledger.selections.isEmpty,"owner can remove a selected task")
         ledger.select(threadID:"thread-a",accountID:"account-a",title:"Project A")
         check(!resumeEligible(ledger.selections[0],accountID:"account-a",turn:failed,primaryRemaining:68,weeklyRemaining:42),"reselecting waits for a new observed exhaustion rather than replaying uncertain work")
+        ledger.select(threadID:"thread-b",accountID:"account-a",title:"Project B")
+        ledger.move(threadID:"thread-b",offset:-1)
+        check(ResumeLedger(defaults:defaults).selections.first?.threadID == "thread-b","priority order survives restart")
+        var legacy = ledger.selections[0]
+        legacy.authorizationVersion = nil
+        legacy.waitingTurnID = "turn-1"
+        check(!resumeEligible(legacy,accountID:"account-a",turn:failed,primaryRemaining:68,weeklyRemaining:42),"legacy selections require explicit one-shot consent")
+        let staleInstance = ResumeLedger(defaults:defaults)
+        ledger.select(threadID:"thread-c",accountID:"account-a",title:"C")
+        staleInstance.remove(threadID:"thread-a")
+        check(ResumeLedger(defaults:defaults).selections.contains { $0.threadID == "thread-c" },"a stale preferences writer cannot erase another instance's new task")
         print("Auto-resume policy: \(failures) failures")
         return failures
     }

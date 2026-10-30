@@ -2,14 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>%@ %@，周额 %@</key>
+	<string>%@ %@、週間 %@</string>
 	<key>%@ Token 消耗 %@</key>
 	<string>%@ の Token 使用量：%@</string>
+	<key>%@ · 上次确认</key>
+	<string>%@ · 前回確認</string>
+	<key>%@ · 待复核</key>
+	<string>%@ · 再確認中</string>
 	<key>%@ 个任务</key>
 	<string>%@ 件のタスク</string>
+	<key>%@ 分钟额度</key>
+	<string>%@分の利用枠</string>
 	<key>%@ 天额度</key>
 	<string>%@日間の利用枠</string>
 	<key>%@ 小时额度</key>
 	<string>%@時間の利用枠</string>
+	<key>%@ 项待恢复授权</key>
+	<string>復帰待ちの許可 %@ 件</string>
+	<key>%@ 项有效授权</key>
+	<string>有効な許可 %@ 件</string>
 	<key>%@可用 %@；下次重置 %@</key>
 	<string>%@の利用可能量 %@、次のリセット %@</string>
 	<key>%@天 %@时</key>
@@ -28,14 +40,38 @@
 	<string>Codex との接続が終了しました。再読み込みしてください。</string>
 	<key>上次兑换待核实，长按按钮可核实同一次兑换。</key>
 	<string>前回のリセットを確認できていません。長押しで同じ申請を確認します。</string>
+	<key>也会在手动刷新、收到账号更新通知或电脑唤醒时检查；并非实时监控，不调用模型。</key>
+	<string>手動更新、アカウント更新通知、Mac の復帰時にも確認します。リアルタイム監視ではなく、モデルも呼び出しません。</string>
+	<key>五小时不限额</key>
+	<string>5時間の上限なし</string>
+	<key>仅恢复一次</key>
+	<string>一度だけ再開</string>
+	<key>仅续跑一次</key>
+	<string>一度だけ再開</string>
+	<key>仅表示本轮结束，请在原对话核对任务结果</key>
+	<string>今回の応答が終了しました。結果は元の会話で確認してください。</string>
+	<key>仅表示没有五小时额度上限；周额度和其他实际限制仍然适用。</key>
+	<string>5時間の上限がないことのみを表します。週間枠やその他の制限は適用されます。</string>
 	<key>任务列表暂无法读取：%@</key>
 	<string>タスク一覧を取得できません：%@</string>
 	<key>任务已有排队消息，请在 Codex 查看</key>
 	<string>タスクに待機中のメッセージがあります。Codex を確認してください</string>
 	<key>任务状态已变化，请在 Codex 查看</key>
 	<string>タスクの状態が変わりました。Codex を確認してください</string>
+	<key>会员与用量 · 每 %@ 秒检查</key>
+	<string>プランと使用量 · %@秒ごと</string>
+	<key>会员待确认</key>
+	<string>プラン未確認</string>
+	<key>会员等级来自本次账号用量读取；检测失败时保留上次确认标记，不猜测会员等级。</key>
+	<string>プランは今回の使用量情報から取得します。取得失敗時は前回確認済みと表示し、推測しません。</string>
+	<key>低于保留值时不再派发；无法限制已运行任务的实际消耗。</key>
+	<string>確保値に達すると新規引き渡しを止めます。実行中の消費は制限できません。</string>
 	<key>保持在其他窗口上方</key>
 	<string>常に手前に表示</string>
+	<key>保留周额</key>
+	<string>週間の確保</string>
+	<key>保留日额</key>
+	<string>5時間の確保</string>
 	<key>停止结果待核实，请在 Codex 查看</key>
 	<string>停止結果を確認できません・Codex を確認してください</string>
 	<key>兑换结果未确认：%@；重试将核实同一次兑换。</key>
@@ -52,10 +88,18 @@
 	<string>使用量を更新</string>
 	<key>加载更多</key>
 	<string>さらに表示</string>
+	<key>勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。</key>
+	<string>チェックで選択したモードを許可。許可後の使用上限による中断のみ再開し、いつでも解除できます。</string>
+	<key>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</key>
+	<string>選択すると、今後の上限到達による中断から一度だけ再開します。今すぐの実行や過去の中断の再開は行いません。</string>
 	<key>取消</key>
 	<string>キャンセル</string>
+	<key>取消全部授权</key>
+	<string>すべての許可を解除</string>
 	<key>取消固定</key>
 	<string>固定を解除</string>
+	<key>取消授权</key>
+	<string>許可を解除</string>
 	<key>取消排队</key>
 	<string>待機を取消</string>
 	<key>取消结果待核实，请在 Codex 查看</key>
@@ -84,24 +128,42 @@
 	<string>未同期</string>
 	<key>已交给 Codex，请在原任务查看</key>
 	<string>Codex に引き渡しました。元のタスクを確認してください</string>
+	<key>已交给 Codex；需要停止时请在原对话操作</key>
+	<string>Codex に引き渡しました。停止は元の会話で操作してください。</string>
+	<key>已停止新增交接；排队和正在执行的任务请分别取消或在原对话停止。</key>
+	<string>新規引き渡しを停止中です。待機中は個別に取り消し、実行中は元の会話で停止してください。</string>
 	<key>已停止，请在 Codex 继续</key>
 	<string>停止しました・Codex で続けてください</string>
+	<key>已加载 %@ 项；搜索仅包含已加载的列表。</key>
+	<string>%@ 件を読み込み済み。検索対象は読み込み済みの一覧です。</string>
 	<key>已取消排队</key>
 	<string>待機中の再開を取り消しました</string>
 	<key>已取消，未提交重置请求。</key>
 	<string>キャンセルしました。リセット要求は送信されていません。</string>
+	<key>已授权一次，等待额度中断</key>
+	<string>一度の再開を許可・監視中</string>
+	<key>已授权任务</key>
+	<string>許可済み</string>
 	<key>已排队，等待 Codex 处理</key>
 	<string>待機中・Codex の処理を待っています</string>
 	<key>已排队，请打开 Codex</key>
 	<string>待機中・Codex を開いてください</string>
 	<key>已核实</key>
 	<string>確認済み</string>
+	<key>已核实，保留防重复记录</key>
+	<string>確認済み・重複防止記録を保持</string>
+	<key>已核实，放行下一项</key>
+	<string>確認済み・次を許可</string>
 	<key>已核实，清除</key>
 	<string>確認済み・消去</string>
 	<key>已用 %@</key>
 	<string>使用済み %@</string>
+	<key>已由你核实并放行；任务进展请看原对话</key>
+	<string>確認のうえ次を許可しました。このタスクの進捗は元の会話で確認してください。</string>
 	<key>已知数据合计</key>
 	<string>取得済みデータの合計</string>
+	<key>已确认撤回排队指令</key>
+	<string>待機指示の取り消しを確認済み</string>
 	<key>已选中，等待额度中断</key>
 	<string>選択済み・上限による中断を監視中</string>
 	<key>已选任务</key>
@@ -112,18 +174,44 @@
 	<string>ウィジェットのサイズ</string>
 	<key>当前可用：%@ 张</key>
 	<string>利用可能なカード：%@ 枚</string>
+	<key>当前已加载列表中没有匹配任务</key>
+	<string>読み込み済みの会話に一致するものがありません</string>
 	<key>当前没有可重置的额度窗口</key>
 	<string>リセットできる利用枠がありません</string>
 	<key>待查询</key>
 	<string>確認中</string>
+	<key>恢复</key>
+	<string>再開</string>
+	<key>恢复监测</key>
+	<string>監視を再開</string>
 	<key>打开重置确认，确认后才会使用重置卡</key>
 	<string>リセットの確認を開きます。明示的に確認するまでカードは使用しません。</string>
+	<key>持续模式会在每次额度恢复后续跑；正常回复结束、等待你处理或其他错误不会自动开始新一轮。</key>
+	<string>継続モードは使用上限の回復後に再開します。通常の応答終了、ユーザー入力待ち、その他のエラーでは新しいラウンドを開始しません。</string>
+	<key>持续监测 %@ 项 · %@</key>
+	<string>継続監視 %@ 件 · %@</string>
+	<key>持续监测，等待下次额度中断</key>
+	<string>次の使用上限による中断を監視中</string>
+	<key>持续续跑（不限次数）</key>
+	<string>継続再開（回数制限なし）</string>
 	<key>按住胶囊任意位置拖动；悬停查看，点击固定。概览右上角 × 或 Escape 关闭；右键或菜单栏可退出。每分钟更新用量。</key>
 	<string>どこでもドラッグして移動できます。ホバーで表示、クリックで固定。× または Escape で閉じ、右クリックかメニューバーから終了します。毎分更新。</string>
 	<key>按住胶囊任意位置拖动；悬停查看；点击固定概览；右键退出</key>
 	<string>どこでもドラッグ · ホバーで表示 · クリックで固定 · 右クリックで終了</string>
+	<key>授权下一次</key>
+	<string>次の一度を許可</string>
+	<key>授权：仅续跑一次</key>
+	<string>一度の再開を許可</string>
+	<key>授权：持续续跑（不限次数）</key>
+	<string>継続的な使用上限回復を許可</string>
 	<key>提交结果待核实，请在 Codex 查看</key>
 	<string>送信結果を確認できません・Codex を確認してください</string>
+	<key>提高优先级</key>
+	<string>優先度を上げる</string>
+	<key>搜索已加载的任务或项目</key>
+	<string>読み込み済みタスク・プロジェクトを検索</string>
+	<key>新增任务的续跑模式</key>
+	<string>新しく選択するタスクの再開モード</string>
 	<key>日用量暂无法读取：%@</key>
 	<string>日別使用量を取得できません：%@</string>
 	<key>日额</key>
@@ -134,10 +222,16 @@
 	<string>5時間 %@、週額 %@</string>
 	<key>日额为 5 小时窗口 · 按住任意位置拖动 · 点击固定 · 右键退出</key>
 	<string>5時間枠 · どこでもドラッグ · クリックで固定 · 右クリックで終了</string>
+	<key>旧版选择，请确认单次授权</key>
+	<string>以前の選択：一度の再開を確認</string>
 	<key>显示胶囊</key>
 	<string>カプセルを表示</string>
 	<key>暂不可用</key>
 	<string>利用不可</string>
+	<key>暂停</key>
+	<string>一時停止</string>
+	<key>暂停续跑</key>
+	<string>引き渡しを一時停止</string>
 	<key>暂无卡片</key>
 	<string>カードなし</string>
 	<key>暂无可选任务，请登录 Codex 后刷新列表</key>
@@ -162,6 +256,8 @@
 	<string>更新 %@</string>
 	<key>更新失败，显示上次数据</key>
 	<string>更新失敗・前回のデータを表示</string>
+	<key>最近额度更新</key>
+	<string>利用枠の最終確認</string>
 	<key>服务未返回数据</key>
 	<string>サービスからデータが返されませんでした</string>
 	<key>服务请求失败</key>
@@ -170,16 +266,28 @@
 	<string>Codex が見つかりません。先に Codex デスクトップアプリをインストールするか開いてください。</string>
 	<key>本周额度</key>
 	<string>今週の利用枠</string>
+	<key>本次授权已使用</key>
+	<string>今回の許可は使用済み</string>
+	<key>本轮已结束</key>
+	<string>今回の応答は終了</string>
 	<key>本轮已结束，继续监测</key>
 	<string>ターン終了・監視を継続</string>
+	<key>本轮结束或出错时通知</key>
+	<string>応答終了・エラー時に通知</string>
+	<key>本轮遇到错误，后续自动交接已暂停</key>
+	<string>今回の応答でエラーが発生。以降の引き渡しは保留中です。</string>
 	<key>查看 / 固定概览</key>
 	<string>概要を表示・固定</string>
+	<key>核实后放行下一项</key>
+	<string>確認して次を許可</string>
 	<key>概览</key>
 	<string>概要</string>
 	<key>正在加入 Codex 队列…</key>
 	<string>Codex の待機列に追加中…</string>
 	<key>正在恢复…</key>
 	<string>再開中…</string>
+	<key>正在执行</key>
+	<string>実行中</string>
 	<key>正在核实…</key>
 	<string>確認中…</string>
 	<key>正在自动续跑</key>
@@ -208,6 +316,8 @@
 	<string>カードを1枚使用</string>
 	<key>确认使用重置卡？</key>
 	<string>リセットカードを使用しますか？</string>
+	<key>确认放行下一项？</key>
+	<string>次の項目を許可しますか？</string>
 	<key>确认核实</key>
 	<string>要求を確認</string>
 	<key>确认核实上次重置？</key>
@@ -216,28 +326,50 @@
 	<string>サンプルデータ</string>
 	<key>立即刷新</key>
 	<string>今すぐ更新</string>
+	<key>等待 %@ · 排队 %@ · 执行 %@</key>
+	<string>枠待ち %@ · 待機 %@ · 実行 %@</string>
 	<key>等待原账号登录</key>
 	<string>元のアカウントでのログインを待機中</string>
 	<key>等待额度恢复</key>
 	<string>利用枠の回復を待機中</string>
+	<key>等待额度高于保留值</key>
+	<string>利用枠が確保値を上回るのを待機</string>
 	<key>管理自动续跑</key>
 	<string>自動再開を管理</string>
+	<key>系统通知未开启，结果仍会保留在续跑记录中。</key>
+	<string>システム通知はオフです。結果は再開履歴に残ります。</string>
 	<key>结果暂不明确，请刷新核实；再次使用会复用本次请求。</key>
 	<string>結果が未確認です。更新して確認してください。再試行では同じ申請を使用します。</string>
 	<key>续跑会消耗额度。请保持胶囊运行；无法确认中断原因时不会自动继续。已开始的任务可在 Codex 中停止，审批仍由你决定。</key>
 	<string>再開すると利用枠を消費します。カプセルを起動したままにしてください。中断理由を確認できない場合は再開しません。開始済みのタスクは Codex で停止でき、承認もご自身で行います。</string>
 	<key>续跑会消耗额度。需保持胶囊运行；电脑休眠期间不执行。无法确认中断原因时不会自动继续；需要审批时会停下提示你。</key>
 	<string>再開すると利用枠を消費します。カプセルを起動したままにしてください。Mac のスリープ中は実行されません。中断理由を確認できない場合は再開せず、承認が必要な場合は停止して通知します。</string>
+	<key>续跑会消耗额度；仅在胶囊运行且电脑唤醒时检查。重置卡每次仍需你确认。</key>
+	<string>再開は利用枠を消費します。カプセル実行中かつ Mac 起動中のみ確認します。リセットカードは毎回確認が必要です。</string>
+	<key>续跑本轮已结束</key>
+	<string>自動再開：今回の応答が終了</string>
+	<key>续跑模式</key>
+	<string>再開モード</string>
+	<key>续跑管理</key>
+	<string>再開の管理</string>
+	<key>续跑规则与通知</key>
+	<string>ルールと通知</string>
 	<key>续跑记录</key>
 	<string>再開の記録</string>
 	<key>续跑记录无法读取，请检查本机存储</key>
 	<string>再開記録を読み取れません。ローカルストレージを確認してください</string>
+	<key>续跑需要你处理</key>
+	<string>自動再開に確認が必要です</string>
 	<key>自动续跑</key>
 	<string>自動再開</string>
+	<key>自动续跑已暂停</key>
+	<string>自動再開は一時停止中</string>
 	<key>设置</key>
 	<string>設定</string>
 	<key>请先在 Codex 确认任务状态</key>
 	<string>先に Codex でタスクの状態を確認してください</string>
+	<key>请先在原对话核实当前任务；放行不会停止它，下一项可能与它同时消耗额度。</key>
+	<string>先に元の会話で現在のタスクを確認してください。次を許可しても停止されず、両方が利用枠を消費する可能性があります。</string>
 	<key>请在浏览器完成登录，然后刷新</key>
 	<string>ブラウザでログインしてから更新してください</string>
 	<key>请求超时，请检查网络后刷新。</key>
@@ -250,12 +382,24 @@
 	<string>システム設定</string>
 	<key>近 7 天 Token</key>
 	<string>直近7日間の Token</string>
+	<key>还没有授权任务</key>
+	<string>許可済みのタスクはありません</string>
+	<key>还没有续跑记录</key>
+	<string>再開履歴はありません</string>
+	<key>进展暂无法核实，请查看原对话</key>
+	<string>進捗を確認できません。元の会話を開いてください</string>
 	<key>连接已断开</key>
 	<string>接続が切断されました</string>
 	<key>退出用量胶囊</key>
 	<string>使用量カプセルを終了</string>
+	<key>选好任务，额度恢复后继续一次。</key>
+	<string>タスクを選び、枠の回復後に一度だけ再開。</string>
 	<key>选择任务</key>
 	<string>タスクを選択</string>
+	<key>选择单次或持续模式；额度恢复后接续原任务。</key>
+	<string>元のタスクを一度または継続的に再開します。</string>
+	<key>通知暂不可用，请在续跑记录中查看结果。</key>
+	<string>通知を利用できません。結果は再開履歴で確認してください。</string>
 	<key>重置 %@</key>
 	<string>リセット %@</string>
 	<key>重置卡 %@</key>
@@ -280,10 +424,18 @@
 	<string>長押しで前回のリセットを確認</string>
 	<key>长按确认</key>
 	<string>長押しで確認</string>
+	<key>降低优先级</key>
+	<string>優先度を下げる</string>
 	<key>隐藏胶囊</key>
 	<string>カプセルを隠す</string>
+	<key>需要你核实，请打开原对话</key>
+	<string>確認が必要です。元の会話を開いてください</string>
 	<key>需要你确认，请在 Codex 继续</key>
 	<string>確認が必要です・Codex で続けてください</string>
+	<key>预览</key>
+	<string>プレビュー</string>
+	<key>额度中断已确认；持续监测等待恢复</key>
+	<string>使用上限による中断を確認。回復を監視中</string>
 	<key>额度窗口</key>
 	<string>利用枠</string>
 </dict>

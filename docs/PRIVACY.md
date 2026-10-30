@@ -27,3 +27,11 @@ Task selection is empty by default. Opening the picker reads local task titles a
 The developer-only `--smoke` diagnostic does read live usage and writes a local report. It is not part of the installation helper. Do not run or publish that report without reviewing its contents.
 
 `doctor` reports the platform, compiler, local CLI path, and installation destination. `status` reports only the app installed at the helper's configured path. These outputs can contain local filesystem paths; redact those before sharing publicly.
+
+### Controlled-resume records (0.9.0 preview)
+
+The local shared handoff ledger now has a locked companion controls file with one-shot authorization IDs, consumed/revoked state, global pause and per-account reserve thresholds. Records may retain a short plain-text excerpt (up to 240 characters) from the continued round for local result cards; clearing visible history retains replay-prevention markers. Opt-in macOS notifications include the task title and outcome category, not conversation text. No result-summary model request or developer telemetry is added. Older widget versions must be closed or updated because they do not understand the new shared controls.
+
+## Continuous recovery in 0.10.0
+
+The same local controls file stores the per-task recovery mode and grant time. A continuous authorization stays active across distinct quota failures until revoked; once-only authorization is consumed on its first handoff. Mode replacement and revocation are enforced under the shared lock. Monitoring does not send model prompts; actual authorized continuations do.
