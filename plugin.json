@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "usage-capsule",
-  "version": "0.7.2",
+  "version": "0.10.0",
   "description": "A polished native macOS Codex quota widget and its installation skill."
 }

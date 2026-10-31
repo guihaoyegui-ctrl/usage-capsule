@@ -1,14 +1,33 @@
-# Validation scope — 0.7.2
+# Validation scope — 0.10.0 preview
 
 Validated locally on an Apple Silicon Mac with Swift 6.4. The project targets macOS 13+; it has not been tested on every supported OS release.
 
 - Logic: quota conversion and clamping, five palette levels and their boundaries, missing versus zero daily data, seven-day ordering, reset outcomes, persistent idempotency and account-switch protection.
 - Reset confirmation: simulated account service checks cancellation/dismissal, explicit consent, repeated activation, account/card changes during confirmation, per-attempt approval, pending-request idempotency, background refresh, and demo mode. Native component checks verify that Return defaults to Cancel, the overview's Escape handler yields to a modal confirmation, and native Cancel/Confirm buttons return the expected decisions. These tests never use the live account or a real card. Physical keyboard input is not claimed as tested.
 - Login renewal: simulated expired-token responses verify one local reconnection and fresh Plus quotas, persistent authorization failure hides stale values, and unrelated network errors retain last-known values with a warning. A manual read-only diagnostic observed the original 401 `token_expired` while a fresh child process returned both renewed quota windows; no model turn or reset-card action was used.
+- Auto-resume: simulated quota transitions and service responses cover opt-in selection, account switch, unknown quota, stale turns, queued-message cancellation, account-independent cancellation, uncertain delivery, cross-instance ownership, queue reconciliation, and no duplicate submission. Isolated offline app-server tests verified shared cold-thread queue persistence and found that repeated client message IDs do not deduplicate. A disposable local task with simulated quota recovery was handed to the actual desktop queue; Codex completed one short model turn, and the widget service reconciled it from history. A separate disposable task was cancelled from the real queue before model execution. Both test conversations were archived. A real quota exhaustion/reset cycle and real reset-card consumption were not tested.
 - Interaction: click/drag/hover state transitions, dismissal, popup anchor placement, and native hit coverage across the 200 × 76 pt and 292 × 106 pt window frames, including the rim and transparent margins.
-- Localization: all 99 keys present in each of four languages, matching format arguments, language resolution and fallback; rendered native sample-data previews reviewed for English, Chinese, Japanese, and Korean.
+- Localization: keys are checked in all four languages with matching format arguments, language resolution and fallback; existing native sample-data previews were reviewed for English, Chinese, Japanese, and Korean.
 - Distribution: Skill metadata validator, native build, ad-hoc code-signature verification, and isolated source installation with paths containing spaces. Offline rendering uses sample data only.
 
 Native hit coverage is a component check. Automated physical desktop dragging is not claimed as tested: the available automation tool cannot perform the native drag action. Live-account connectivity and reset redemption are not part of distribution tests. No card is consumed during tests.
 
 The GitHub Actions workflow runs logic/localization checks, builds the app, and verifies the bundle. Its presence is not a claim that remote CI has passed; inspect the actual run for the published commit.
+
+## 2026-10-29 controlled-resume verification
+
+The full `test.sh --ui` suite covers single-use consent, legacy re-consent, priority persistence, pre-selection failure rejection, durable shared pause/reserves, cross-instance consumed/revoked consent, cancellation/account changes during wake preflight, inconclusive history, matching final-response extraction, notification claiming, preference merging and foreign-bundle queue ownership. All suites passed after independent review fixes. Native SwiftUI/AppKit manager rendering was inspected with isolated sample data.
+
+A read-only harness used the exact prior disposable test's client message ID and actual archived Codex history. It confirmed the matching completed round, its final response excerpt and release of the serial barrier. This check did not start a model turn, add a queue message or consume a reset card. System notification banner delivery, approval detection from the independent reader and a genuine natural quota reset are not claimed as live-verified.
+
+On 2026-10-30, the signed personal 0.9.0 build 12 was installed, preserving its bundle identity and preferences. Native UI checks confirmed the three tabs, no-match search, rules disclosure, and management-window closure. Existing user selections were observed but not changed; notification opt-in remained off. The final full suite reported 241 PASS checks and zero failures. The capsule was reopened after installation. This is a local preview, not a claim of merge or public release.
+
+## Membership-aware compatibility, 2026-10-30
+
+Added profile, service and reset-transition cases for Pro-family weekly-only responses, swapped slots, finite-window precedence, ambiguous/missing values, explicit backend usage denial, unknown permission, reserve boundaries, Free/Go partial-data policy, upgrade/downgrade/auth expiry, bounded account-event follow-up, account invalidation during dispatch and wake, unsupported intermediate configuration, and notification suppression while account identity is unconfirmed. A read-only real account check confirmed Plus, two canonical windows and affirmative ordinary usage permission. Plus/Pro sample-data native rendering was inspected; live Pro/Free/Go accounts and real paid subscription changes were not available for this test.
+
+## Continuous recovery, 2026-10-31
+
+Simulated native service tests first reproduced the one-shot-only limitation, then verified two distinct quota failures across restart, unique client IDs, repeated-poll deduplication, durable revocation across stale instances and unchanged once-only behavior. Completed, interrupted, unrelated-error and missing-completion-time cases cannot create another recovery. Independent review found non-atomic mode replacement and stale-progress regression of hidden terminal failures; both were reproduced with failing tests before correction. Tests do not authorize real user tasks, generate model turns or consume reset cards. Multiple natural reset cycles remain unverified in a real continuous-mode session.
+
+Final combined suite: 304 PASS checks, zero failures, including native interaction coverage. Both signed variants built successfully. Personal 0.10.0 build 14 was installed with preference preservation and rollback backup; native AX exposed both recovery modes and corrected checkbox states. No real-task authorization or reset-card action was performed by the agent.

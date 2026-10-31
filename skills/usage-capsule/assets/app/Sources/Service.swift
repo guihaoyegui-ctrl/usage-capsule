@@ -6,7 +6,7 @@ struct ServiceError: LocalizedError {
     let message: String
     var errorDescription: String? { message }
 }
-private func expiredAuthentication(_ error: Error) -> Bool {
+func expiredAuthentication(_ error: Error) -> Bool {
     let message = error.localizedDescription.lowercased()
     return message.contains("token_expired") || message.contains("401 unauthorized")
 }
@@ -94,7 +94,7 @@ extension CodexServing {
         }
         process = p; input = stdin; buffer.removeAll()
         try p.run()
-        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.7.2"], "capabilities": ["experimentalApi":true]])
+        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.9.1"], "capabilities": ["experimentalApi":true]])
         try send(["method":"initialized", "params": [:]])
         initialized = true
     }
@@ -159,18 +159,56 @@ extension CodexServing {
     @Published var alwaysOnTop = true
     @Published var scale = 1.0
     @Published var language = UserDefaults.standard.string(forKey:"interfaceLanguage") ?? "system"
+    @Published var recentThreads: [ResumeThreadChoice] = []
+    @Published var loadingThreads = false
+    @Published var resumeStatuses: [String:String] = [:]
+    @Published var resumeNotice: String?
+    @Published var activeHandoffSubmissionID: String?
+    @Published var resumeNotificationsEnabled = false
+    @Published var resumeNotificationNotice: String?
+    @Published var resumeTrackingUnavailable: Set<String> = []
+    var deliverResumeNotification: ((HandoffRecord)->Void)?
+    var configureResumeNotifications: ((Bool)->Void)?
+    var resumeScanning = false
+    var resumeListCursor: String?
+    let resumeLedger: ResumeLedger
+    let handoffLedger: HandoffLedger
+    let wakeThread: (String)->Bool
+    let taskConnection: CodexServing
+    var openResumeSettings: (() -> Void)?
     let connection: CodexServing
     private var timer: Timer?
+    private var pendingAccountRefresh = false
+    private(set) var accountSnapshotRevision = 0
+    private var verifiedAccountRevision = 0
+    private var stopped = false
+    static let refreshInterval:TimeInterval = 60
     let redemption: RedemptionLedger
     private let confirmReset: (ResetConfirmation) -> Bool
-    init(connection:CodexServing? = nil,redemption:RedemptionLedger? = nil,confirmReset:((ResetConfirmation)->Bool)? = nil) {
+    init(connection:CodexServing? = nil,taskConnection:CodexServing? = nil,redemption:RedemptionLedger? = nil,resumeLedger:ResumeLedger? = nil,handoffLedger:HandoffLedger? = nil,wakeThread:((String)->Bool)? = nil,confirmReset:((ResetConfirmation)->Bool)? = nil) {
         self.connection=connection ?? CodexConnection()
+        self.taskConnection=taskConnection ?? connection ?? CodexConnection()
+        self.resumeLedger=resumeLedger ?? ResumeLedger()
+        self.handoffLedger=handoffLedger ?? HandoffLedger()
+        self.wakeThread=wakeThread ?? { id in
+            guard UUID(uuidString:id) != nil, let url=URL(string:"codex://threads/wake/\(id)") else { return false }
+            return NSWorkspace.shared.open(url)
+        }
         self.redemption=redemption ?? RedemptionLedger()
         self.confirmReset=confirmReset ?? { ResetConfirmationPrompt.present($0) }
     }
     var pendingRedemption: Bool { redemption.pending != nil }
-    var primary: QuotaWindow? { limits?.bucket?.primary }
-    var secondary: QuotaWindow? { limits?.bucket?.secondary }
+    var primary: QuotaWindow? { limits?.quotaProfile.fiveHour }
+    var secondary: QuotaWindow? { limits?.quotaProfile.weekly }
+    var accountSnapshotVerified:Bool { limits != nil && verifiedAccountRevision == accountSnapshotRevision }
+    var primaryUnlimited: Bool { error == nil && accountSnapshotVerified && limits?.quotaProfile.fiveHourUnlimited == true }
+    var displayedPrimary:QuotaWindow? { primary ?? (primaryUnlimited ? nil : limits?.quotaProfile.otherWindows.first) }
+    var displayedPrimaryLabel:String { primary != nil || primaryUnlimited ? L10n.text("日额") : (displayedPrimary?.title ?? L10n.text("日额")) }
+    var membershipLabel: String {
+        guard let profile = limits?.quotaProfile else { return L10n.text("会员待确认") }
+        if error != nil { return L10n.format("%@ · 上次确认",profile.planName) }
+        return accountSnapshotVerified ? profile.planName : L10n.format("%@ · 待复核",profile.planName)
+    }
     var resetCount: Int? { limits?.rateLimitResetCredits?.availableCount }
     var selected: DayUsage? { days.first { $0.date == selectedDay } ?? days.last }
     var canRedeem: Bool { !demo && mayRedeem(cardCount:resetCount,pending:redemption.pending,busy:redeeming || refreshing,connected:error == nil && lastSync != nil,accountID:limits?.accountId) }
@@ -183,21 +221,41 @@ extension CodexServing {
         return resetCount == 0 ? L10n.text("暂无重置卡") : L10n.text("长按 0.8 秒打开确认")
     }
     func start() {
+        stopped = false
         if pendingRedemption { notice = L10n.text("上次兑换待核实，长按按钮可核实同一次兑换。") }
         if ProcessInfo.processInfo.arguments.contains("--demo") { loadDemo(); return }
         connection.notification = { [weak self] method, _ in
-            if method == "account/login/completed" || method == "account/rateLimits/updated" { Task { await self?.refresh() } }
+            self?.handleAccountNotification(method)
         }
         Task { await refresh() }
-        timer = Timer.scheduledTimer(withTimeInterval:60,repeats:true) { [weak self] _ in Task { @MainActor [weak self] in await self?.refresh() } }
+        timer = Timer.scheduledTimer(withTimeInterval:Self.refreshInterval,repeats:true) { [weak self] _ in Task { @MainActor [weak self] in await self?.refresh() } }
     }
-    func stop() { timer?.invalidate(); connection.disconnect() }
-    func refresh() async {
-        guard !refreshing, !redeeming, !demo else { return }
-        refreshing = true; defer { refreshing = false }
+    func stop() { stopped = true; pendingAccountRefresh = false; timer?.invalidate(); connection.disconnect(); taskConnection.disconnect() }
+    func handleAccountNotification(_ method:String) {
+        guard ["account/login/completed","account/updated","account/rateLimits/updated"].contains(method) else { return }
+        accountSnapshotRevision += 1
+        resumeLedger.clearQuotaObservation()
+        objectWillChange.send()
+        requestAccountRefresh()
+    }
+    func requestAccountRefresh() {
+        guard !demo, !stopped else { return }
+        if refreshing || redeeming { pendingAccountRefresh = true; return }
+        Task { await refresh() }
+    }
+    func refresh(followup:Bool = false) async {
+        guard !refreshing, !redeeming, !demo, !stopped else { return }
+        refreshing = true
+        defer {
+            refreshing = false
+            let shouldFollow = pendingAccountRefresh && !followup && !stopped
+            pendingAccountRefresh = false
+            if shouldFollow { Task { await refresh(followup:true) } }
+        }
         var authenticationExpired = false
         do {
             try await connection.connect()
+            var readRevision = accountSnapshotRevision
             let rateLimitData: Data
             do { rateLimitData = try await connection.request("account/rateLimits/read") }
             catch {
@@ -205,16 +263,22 @@ extension CodexServing {
                 authenticationExpired = true
                 connection.disconnect()
                 try await connection.connect()
+                readRevision = accountSnapshotRevision
                 rateLimitData = try await connection.request("account/rateLimits/read")
             }
-            limits = try JSONDecoder().decode(LimitsResponse.self,from:rateLimitData)
+            let snapshot = try JSONDecoder().decode(LimitsResponse.self,from:rateLimitData)
+            verifiedAccountRevision = readRevision
+            limits = snapshot
             lastSync = Date(); error = nil
             do {
                 let usage = try JSONDecoder().decode(UsageResponse.self,from:await connection.request("account/usage/read"))
                 days = recentDays(buckets:usage.dailyUsageBuckets); usageError = nil
                 if !days.contains(where:{$0.date == selectedDay}) { selectedDay = days.last?.date ?? todayKey() }
             } catch { usageError = L10n.format("日用量暂无法读取：%@", String(describing: (error.localizedDescription))) }
+            await scanAutoResume()
         } catch {
+            verifiedAccountRevision = -1
+            resumeLedger.clearQuotaObservation()
             if authenticationExpired || expiredAuthentication(error) {
                 limits = nil; days = recentDays(buckets:nil); lastSync = nil; usageError = nil
                 self.error = L10n.text("Codex 登录已过期，请重新登录后刷新。")
@@ -226,7 +290,7 @@ extension CodexServing {
         redeeming = true; notice = nil
         let attempted=await confirmAndRedeem()
         redeeming=false
-        if attempted { await refresh() }
+        if attempted || pendingAccountRefresh { pendingAccountRefresh = false; await refresh() }
     }
     private func confirmation(for limits:LimitsResponse) -> ResetConfirmation? {
         guard let accountID=limits.accountId else { return nil }
@@ -285,7 +349,7 @@ extension CodexServing {
     func loadDemo() {
         demo = true; error = nil; lastSync = Date()
         limits = try? JSONDecoder().decode(LimitsResponse.self,from:Data("""
-        {"rateLimits":{"primary":{"usedPercent":32,"windowDurationMins":300,"resetsAt":\(Date().timeIntervalSince1970+8300)},"secondary":{"usedPercent":58,"windowDurationMins":10080,"resetsAt":\(Date().timeIntervalSince1970+280000)}},"rateLimitResetCredits":{"availableCount":1}}
+        {"ordinaryUsageAllowed":true,"rateLimits":{"planType":"plus","primary":{"usedPercent":32,"windowDurationMins":300,"resetsAt":\(Date().timeIntervalSince1970+8300)},"secondary":{"usedPercent":58,"windowDurationMins":10080,"resetsAt":\(Date().timeIntervalSince1970+280000)}},"rateLimitResetCredits":{"availableCount":1}}
         """.utf8))
         let values: [Int64] = [8200,14500,3100,22400,9800,0,15420]
         days = recentDays(buckets:nil).enumerated().map { DayUsage(date:$0.element.date,tokens:values[$0.offset]) }

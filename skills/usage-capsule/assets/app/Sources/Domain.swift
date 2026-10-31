@@ -1,6 +1,11 @@
 import Foundation
 import CoreGraphics
 
+enum ResumeMode: String, Codable, CaseIterable {
+    case once, continuous
+    var label:String { self == .continuous ? L10n.text("持续续跑（不限次数）") : L10n.text("仅续跑一次") }
+}
+
 enum CapsulePointerRelease { case none, click, drag }
 struct CapsulePointerGesture {
     private var origin:CGPoint?
@@ -51,10 +56,12 @@ struct QuotaWindow: Codable {
         return min(100, max(0, 100 - usedPercent))
     }
     var title: String {
-        guard let windowDurationMins else { return L10n.text("额度窗口") }
+        guard let windowDurationMins, windowDurationMins > 0 else { return L10n.text("额度窗口") }
         if windowDurationMins == 300 { return L10n.text("5 小时窗口") }
         if windowDurationMins == 10080 { return L10n.text("本周额度") }
-        return windowDurationMins < 1440 ? L10n.format("%@ 小时额度", String(describing: (windowDurationMins / 60))) : L10n.format("%@ 天额度", String(describing: (windowDurationMins / 1440)))
+        if windowDurationMins % 1440 == 0 { return L10n.format("%@ 天额度",String(windowDurationMins / 1440)) }
+        if windowDurationMins % 60 == 0 { return L10n.format("%@ 小时额度",String(windowDurationMins / 60)) }
+        return L10n.format("%@ 分钟额度",String(windowDurationMins))
     }
 }
 struct LimitBucket: Codable { var primary: QuotaWindow?; var secondary: QuotaWindow?; var planType: String? }
@@ -65,7 +72,66 @@ struct LimitsResponse: Codable {
     var rateLimits: LimitBucket?
     var rateLimitsByLimitId: [String: LimitBucket]?
     var rateLimitResetCredits: ResetCredits?
+    var ordinaryUsageAllowed: Bool?
     var bucket: LimitBucket? { rateLimitsByLimitId?["codex"] ?? rateLimits }
+    var quotaProfile: QuotaProfile { QuotaProfile(snapshot:self) }
+}
+
+/// One interpretation shared by UI, reserve controls and the final handoff.
+/// Null windows remain unknown. Only the documented Pro family has a default
+/// unmetered five-hour window; actual finite windows always take precedence.
+struct QuotaProfile {
+    let planType: String?
+    let fiveHour: QuotaWindow?
+    let weekly: QuotaWindow?
+    let otherWindows: [QuotaWindow]
+    let ambiguous: Bool
+    let ordinaryUsageAllowed: Bool?
+    var isPro: Bool { ["pro","prolite","promax"].contains(planType ?? "") }
+    var isEntryPlan: Bool { planType == "free" || planType == "go" }
+    var fiveHourUnlimited: Bool { isPro && fiveHour == nil && !ambiguous }
+    var configurationID: String {
+        (planType ?? "unknown") + ":" + ([fiveHour,weekly].compactMap { $0 } + otherWindows).compactMap(\.windowDurationMins).sorted().map(String.init).joined(separator:",") + (ambiguous ? ":ambiguous" : "")
+    }
+    var planName: String {
+        switch planType {
+        case "free": return "Free"
+        case "go": return "Go"
+        case "plus": return "Plus"
+        case "pro", "prolite", "promax": return "Pro"
+        case "team", "business", "self_serve_business_prolite", "self_serve_business_usage_based": return "Business"
+        case "enterprise", "ent26", "enterprise_cbp_automation", "enterprise_cbp_usage_based": return "Enterprise"
+        case "edu", "edu_plus", "edu_pro": return "Edu"
+        default: return L10n.text("会员待确认")
+        }
+    }
+    init(snapshot:LimitsResponse) {
+        let bucket = snapshot.bucket
+        planType = bucket?.planType?.trimmingCharacters(in:.whitespacesAndNewlines).lowercased()
+        ordinaryUsageAllowed = snapshot.ordinaryUsageAllowed
+        let windows = [bucket?.primary,bucket?.secondary].compactMap { $0 }
+        fiveHour = windows.first { $0.windowDurationMins == 300 }
+        weekly = windows.first { $0.windowDurationMins == 10080 }
+        otherWindows = windows.filter { $0.windowDurationMins != 300 && $0.windowDurationMins != 10080 }
+        let durations = windows.compactMap(\.windowDurationMins)
+        ambiguous = windows.contains { ($0.windowDurationMins ?? 0) <= 0 } || Set(durations).count != durations.count
+    }
+    func allowsResume(primaryReserve:Double = 0,weeklyReserve:Double = 0) -> Bool {
+        guard ordinaryUsageAllowed == true, !ambiguous else { return false }
+        let windows = [fiveHour,weekly].compactMap { $0 } + otherWindows
+        guard !windows.isEmpty else { return false }
+        // Partial entry-tier payloads are usable only with an affirmative
+        // account-bound backend permission, not an inferred absent restriction.
+        if !isEntryPlan || ordinaryUsageAllowed != true {
+            guard fiveHour != nil || fiveHourUnlimited, weekly != nil else { return false }
+        }
+        for window in windows {
+            guard let used = window.usedPercent, used.isFinite, (0...100).contains(used), let remaining = window.remaining else { return false }
+            let floor = window.windowDurationMins == 300 ? primaryReserve : (window.windowDurationMins == 10080 ? weeklyReserve : 0)
+            guard floor.isFinite, floor >= 0, remaining > floor else { return false }
+        }
+        return true
+    }
 }
 struct DailyBucket: Codable { var startDate: String; var tokens: Int64 }
 struct UsageResponse: Codable { var dailyUsageBuckets: [DailyBucket]? }

@@ -14,6 +14,8 @@ check(limits.bucket?.secondary?.remaining == 42, "secondary quota remains indepe
 check(limits.rateLimitResetCredits?.availableCount == 2, "authoritative reset count works without details")
 check(QuotaWindow(usedPercent: 150, windowDurationMins: 300, resetsAt: nil).remaining == 0, "over-range usage cannot yield negative remaining")
 check(QuotaWindow(usedPercent: nil, windowDurationMins: 300, resetsAt: nil).remaining == nil, "unknown usage is not zero")
+check(QuotaWindow(usedPercent:20,windowDurationMins:30,resetsAt:nil).title.contains("30"),"a 30-minute quota is not mislabeled as zero hours")
+check(QuotaWindow(usedPercent:20,windowDurationMins:90,resetsAt:nil).title.contains("90"),"a 90-minute quota is not truncated to one hour")
 check(glowStrength(remaining: 0) == 0, "zero quota extinguishes light")
 check(glowStrength(remaining:50) >= 0.95, "half quota keeps a clearly luminous lamp")
 check(glowStrength(remaining: 10) > 0, "low quota remains visible")

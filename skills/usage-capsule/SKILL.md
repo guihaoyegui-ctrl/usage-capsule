@@ -1,6 +1,6 @@
 ---
 name: usage-capsule
-description: Install, launch, configure, or troubleshoot the Usage Capsule desktop quota widget on an Apple Silicon Mac. Use for the floating five-hour/weekly Codex quota capsule, its language settings, and its seven-day token view.
+description: Install, launch, configure, or troubleshoot the Usage Capsule desktop quota widget on an Apple Silicon Mac. Use for its five-hour/weekly quota display, languages, seven-day token view, and owner-selected task auto-resume.
 ---
 
 # Usage Capsule
@@ -22,7 +22,10 @@ In a restricted agent sandbox, process inspection (`status`, `install`, `stop`) 
 - Drag anywhere in the widget's rectangular frame, including the rim and margins. Hover to preview; click to pin. Close the overview with × or Escape. The menu-bar item can recover a hidden widget; right-click offers settings, hide, refresh, and quit.
 - Language: select System, 简体中文, English, 日本語, or 한국어 in Settings, or run `language system|zh-Hans|en|ja|ko`. The helper restarts only its own installed app when needed.
 - The compact labels show the five-hour window and weekly quota. The seven date cells show daily token consumption. Missing daily data is unavailable, not zero; an older CLI may support quota but lack daily usage.
-- Automatic refresh runs every 60 seconds and reads `account/rateLimits/read` and `account/usage/read`; it creates no model generation turn. The installation conversation itself still has its normal model usage.
+- Quota checks run every 60 seconds and read `account/rateLimits/read` and `account/usage/read` without model generation. Opt-in task continuations do start model turns and consume quota. The installation conversation itself also has its normal model usage.
+- Auto-resume is opt-in per task from the overview, menu, or Settings. Let the owner select tasks; installation and diagnosis do not authorize selecting tasks or starting a live continuation. The app detects structured quota failures and observed exhaustion or a narrowly verified reset transition, waits for backend permission and all applicable quota windows, then submits to Codex's native queue for desktop execution. It preserves account scope and durable dispatch markers and skips ambiguous interruptions. Deselecting stops monitoring and attempts to remove a still-queued message; work already started must be stopped in the original Codex conversation. Keep the app running; long missed intervals are not inferred. Do not claim a real quota-reset continuation has been tested from a simulated-service test alone.
+- Each task supports Resume once (default) or explicit Continuous (unlimited recoveries). Continuous consent stays active for later verified quota interruptions until the owner revokes it; never upgrade old selections or enable a mode on the owner's behalf during installation or diagnosis. Ordinary completion, owner-input requests, manual interruption and unrelated errors never authorize a new round. Each failed turn remains durably deduplicated; ambiguous execution needs inspection.
+- The overview shows returned membership. Pro-family infinity means no five-hour cap only when no finite five-hour window is returned; weekly and other real limits still apply. Checks also run on supported account events, activation and wake, and may lag backend membership changes.
 - If the local Codex login expires, the app rebuilds its background connection and retries one read. Persistent authorization failure clears stale quota figures and offers sign-in; do not present an old percentage as live usage.
 - A 0.8-second hold or an accessibility action only opens the reset confirmation dialog. Only the customer's explicit confirmation can submit a request. Cancel, closing, and Escape submit nothing. Do not confirm the dialog on the customer's behalf. **Never redeem a card during installation, diagnostics, preview, or tests.** Do not automate consumption or bypass the account/idempotency checks.
 

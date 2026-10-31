@@ -5,6 +5,7 @@ import Foundation
     var responses: [Result<Data, Error>]
     var reads = 0
     var disconnects = 0
+    var onUsageRead: (() -> Void)?
     init(_ responses: [Result<Data, Error>]) { self.responses = responses }
     func connect() async throws {}
     func disconnect() { disconnects += 1 }
@@ -14,6 +15,7 @@ import Foundation
             reads += 1
             return try responses.removeFirst().get()
         case "account/usage/read":
+            onUsageRead?()
             return Data("{\"dailyUsageBuckets\":[]}".utf8)
         default:
             throw ServiceError(message:"Unexpected request: \(method)")
@@ -62,6 +64,22 @@ import Foundation
         await offline.refresh()
         check(offline.primary?.remaining == 99 && offline.error != nil && offlineConnection.reads == 1,
               "temporary network failure retains the last known reading with an error")
+        let plus = Data("{\"accountId\":\"same-account\",\"ordinaryUsageAllowed\":true,\"rateLimits\":{\"planType\":\"plus\",\"primary\":{\"usedPercent\":12,\"windowDurationMins\":300},\"secondary\":{\"usedPercent\":8,\"windowDurationMins\":10080}}}".utf8)
+        let pro = Data("{\"accountId\":\"same-account\",\"ordinaryUsageAllowed\":true,\"rateLimits\":{\"planType\":\"pro\",\"primary\":{\"usedPercent\":23,\"windowDurationMins\":10080}}}".utf8)
+        let (changing,_) = fixture([.success(plus),.success(pro),.success(plus),.failure(expired),.failure(expired)])
+        await changing.refresh()
+        check(changing.limits?.quotaProfile.planName == "Plus" && changing.primary?.remaining == 88,"membership is taken from the current quota response")
+        await changing.refresh()
+        check(changing.limits?.quotaProfile.planName == "Pro" && changing.primary == nil && changing.secondary?.remaining == 77,"upgrade replaces old Plus numbers with Pro weekly-only data")
+        await changing.refresh()
+        check(changing.limits?.quotaProfile.planName == "Plus" && changing.primary?.remaining == 88,"downgrade removes prior Pro infinity")
+        await changing.refresh()
+        check(changing.limits == nil,"expired login clears prior membership as well as quotas")
+        let (events,eventConnection) = fixture([.success(plus),.success(pro)])
+        eventConnection.onUsageRead = { events.handleAccountNotification("account/updated") }
+        await events.refresh()
+        for _ in 0..<30 { await Task.yield() }
+        check(eventConnection.reads == 2 && events.limits?.quotaProfile.planName == "Pro","membership event during a refresh causes one bounded fresh read")
         print("Refresh recovery: \(failures) failures")
         return failures
     }

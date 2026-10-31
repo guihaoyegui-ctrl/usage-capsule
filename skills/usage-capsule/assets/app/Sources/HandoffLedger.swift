@@ -1,0 +1,333 @@
+import Foundation
+import Darwin
+
+// The ledger is separate from task selection: removing a selection cannot
+// erase an unresolved submission or its controls.
+enum HandoffState: String, Codable {
+    case submitting, uncertain, queued, handedOff, cancelled, acknowledged
+    var unresolved: Bool { self == .submitting || self == .uncertain || self == .queued }
+}
+
+struct HandoffRecord: Codable, Identifiable, Equatable {
+    let threadID: String
+    let accountID: String
+    let title: String
+    let failedTurnID: String
+    let clientMessageID: String
+    var queueID: String?
+    var state: HandoffState
+    var hidden: Bool
+    var ownerPID: Int32? = nil
+    var turnID: String? = nil
+    var turnStatus: String? = nil
+    var excerpt: String? = nil
+    var createdAt: Double? = nil
+    var endedAt: Double? = nil
+    var releasedAfterInspection: Bool? = nil
+    var notificationClaimed: Bool? = nil
+    var authorizationID: String? = nil
+    var quotaFailureConfirmed: Bool? = nil
+    var id: String { clientMessageID }
+    var blocksDispatch: Bool {
+        state.unresolved || (state == .handedOff && turnStatus != "completed" && !(turnStatus == "failed" && quotaFailureConfirmed == true) && releasedAfterInspection != true)
+    }
+}
+
+struct ResumeReserve: Codable {
+    var primary: Double
+    var weekly: Double
+}
+private struct ResumeControls: Codable {
+    var paused = false
+    var reserves: [String:ResumeReserve] = [:]
+    var authorizations: [String:ResumeAuthorization]? = nil
+}
+private struct ResumeAuthorization: Codable {
+    var mode: ResumeMode? = nil
+    var grantedAt: Double? = nil
+    var threadID: String
+    var accountID: String
+    var state: String
+}
+
+@MainActor final class HandoffLedger {
+    private let fileURL: URL
+    private(set) var records: [HandoffRecord] = []
+    private(set) var storageError: String?
+    private var controls = ResumeControls()
+    private var controlsURL: URL { fileURL.appendingPathExtension("controls.json") }
+    var paused: Bool { controls.paused }
+    func authorizationState(_ id:String?) -> String? { id.flatMap { controls.authorizations?[$0]?.state } }
+    func authorizationMode(_ id:String?) -> ResumeMode? { id.flatMap { controls.authorizations?[$0].map { $0.mode ?? .once } } }
+    @discardableResult func authorize(id:String,threadID:String,accountID:String,mode:ResumeMode = .once,grantedAt:Double = Date().timeIntervalSince1970) -> Bool {
+        guard !id.isEmpty, !threadID.isEmpty, !accountID.isEmpty, grantedAt.isFinite, grantedAt > 0 else { return false }
+        return locked(false) {
+            guard reload(convertSubmitting:false) else { return false }
+            if let existing = controls.authorizations?[id] {
+                return existing.threadID == threadID && existing.accountID == accountID && existing.state == "active" && (existing.mode ?? .once) == mode
+            }
+            // Replacement and grant share the dispatch lock. A delayed older
+            // intent must not replace a newer choice made in another bundle.
+            guard !(controls.authorizations ?? [:]).values.contains(where: { $0.threadID == threadID && ($0.grantedAt ?? 0) > grantedAt }) else { return false }
+            for (key,var authorization) in controls.authorizations ?? [:] where authorization.threadID == threadID {
+                authorization.state = "revoked"
+                controls.authorizations?[key] = authorization
+            }
+            if controls.authorizations == nil { controls.authorizations = [:] }
+            controls.authorizations?[id] = ResumeAuthorization(mode:mode,grantedAt:grantedAt,threadID:threadID,accountID:accountID,state:"active")
+            return persistControls()
+        }
+    }
+    @discardableResult func revokeAuthorizations(threadID:String) -> Bool {
+        changeControls { controls in
+            for (key,var authorization) in controls.authorizations ?? [:] where authorization.threadID == threadID {
+                authorization.state = "revoked"
+                controls.authorizations?[key] = authorization
+            }
+        }
+    }
+    var storageCorrupted: Bool { storageError != nil }
+
+    init(fileURL:URL? = nil) {
+        let applicationSupport = FileManager.default.urls(for:.applicationSupportDirectory,in:.userDomainMask).first
+            ?? URL(fileURLWithPath:NSHomeDirectory(),isDirectory:true).appendingPathComponent("Library/Application Support",isDirectory:true)
+        // Personal and public builds share this ledger so two installations
+        // cannot independently submit the same continuation.
+        self.fileURL = fileURL ?? applicationSupport.appendingPathComponent("Usage Capsule",isDirectory:true).appendingPathComponent("auto-resume-handoffs.json")
+        _ = locked(false) { reload(convertSubmitting:true) }
+    }
+    var visibleRecords: [HandoffRecord] { records.filter { !$0.hidden } }
+    var hasUnresolved: Bool { storageCorrupted || records.contains { $0.state.unresolved || Self.ownerIsAlive($0.ownerPID) } }
+    var hasDispatchBlocker: Bool { storageCorrupted || records.contains { $0.blocksDispatch || Self.ownerIsAlive($0.ownerPID) } }
+    func reserve(accountID:String) -> ResumeReserve { controls.reserves[accountID] ?? ResumeReserve(primary:0,weekly:0) }
+    func permitsDispatch(accountID:String,primary:Double?,weekly:Double?,quotaProfile:QuotaProfile? = nil) -> Bool {
+        let floor = reserve(accountID:accountID)
+        if let quotaProfile { return !storageCorrupted && !paused && quotaProfile.allowsResume(primaryReserve:floor.primary,weeklyReserve:floor.weekly) }
+        guard !storageCorrupted, !paused, let primary, let weekly, primary.isFinite, weekly.isFinite,
+              primary <= 100, weekly <= 100 else { return false }
+        return primary > floor.primary && weekly > floor.weekly
+    }
+    @discardableResult func setPaused(_ paused:Bool) -> Bool {
+        changeControls { $0.paused = paused }
+    }
+    @discardableResult func setReserve(accountID:String,primary:Double,weekly:Double) -> Bool {
+        guard !accountID.isEmpty, primary.isFinite, weekly.isFinite, (0...90).contains(primary), (0...90).contains(weekly) else { return false }
+        return changeControls { $0.reserves[accountID] = ResumeReserve(primary:primary,weekly:weekly) }
+    }
+    private func changeControls(_ update:(inout ResumeControls)->Void) -> Bool {
+        locked(false) {
+            guard reload(convertSubmitting:false) else { return false }
+            update(&controls)
+            return persistControls()
+        }
+    }
+    private func persistControls() -> Bool {
+        do {
+                try JSONEncoder().encode(controls).write(to:controlsURL,options:.atomic)
+                try FileManager.default.setAttributes([.posixPermissions:0o600],ofItemAtPath:controlsURL.path)
+                let handle = try FileHandle(forWritingTo:controlsURL)
+                defer { try? handle.close() }
+                try handle.synchronize()
+                return true
+        } catch { storageError = error.localizedDescription; return false }
+    }
+    private static func ownerIsAlive(_ pid:Int32?) -> Bool {
+        guard let pid, pid > 0 else { return false }
+        if Darwin.kill(pid,0) == 0 { return true }
+        return errno != ESRCH
+    }
+    func canAcknowledge(_ record:HandoffRecord) -> Bool {
+        (record.state == .uncertain || record.state == .submitting) && !Self.ownerIsAlive(record.ownerPID)
+    }
+
+    // Returns only after the intent and client ID are saved. Callers must not
+    // send a request when this returns nil, including when storage is invalid.
+    func begin(threadID:String,accountID:String,title:String,failedTurnID:String,primaryRemaining:Double? = nil,weeklyRemaining:Double? = nil,authorizationID:String? = nil,quotaProfile:QuotaProfile? = nil) -> HandoffRecord? {
+        guard !storageCorrupted, !threadID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,
+              !accountID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,
+              !failedTurnID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return nil }
+        return locked(nil as HandoffRecord?) {
+            guard reload(convertSubmitting:false), !paused, !hasDispatchBlocker,
+                  !records.contains(where: { $0.threadID == threadID && $0.accountID == accountID && $0.failedTurnID == failedTurnID }) else { return nil }
+            if let authorizationID {
+                guard let authorization = controls.authorizations?[authorizationID], authorization.state == "active",
+                      authorization.threadID == threadID, authorization.accountID == accountID,
+                      ((authorization.mode ?? .once) == .continuous || !records.contains(where: { $0.authorizationID == authorizationID })) else { return nil }
+            }
+            if primaryRemaining != nil || weeklyRemaining != nil || quotaProfile != nil {
+                guard permitsDispatch(accountID:accountID,primary:primaryRemaining,weekly:weeklyRemaining,quotaProfile:quotaProfile) else { return nil }
+            }
+            let item = HandoffRecord(threadID:threadID,accountID:accountID,title:title,failedTurnID:failedTurnID,
+                                     clientMessageID:UUID().uuidString.lowercased(),queueID:nil,state:.submitting,hidden:false,ownerPID:Darwin.getpid(),createdAt:Date().timeIntervalSince1970,authorizationID:authorizationID)
+            records.append(item)
+            guard persist() else { records.removeLast(); return nil }
+            if let authorizationID, controls.authorizations?[authorizationID]?.mode != .continuous {
+                controls.authorizations?[authorizationID]?.state = "consumed"
+                guard persistControls() else { return nil }
+            }
+            return item
+        }
+    }
+    @discardableResult func refresh() -> Bool {
+        guard !storageCorrupted else { return false }
+        return locked(false) { reload(convertSubmitting:false) }
+    }
+
+    @discardableResult func markQueued(clientMessageID:String,queueID:String) -> Bool {
+        guard !queueID.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return false }
+        return change(clientMessageID) { item in
+            if item.state == .queued { return item.queueID == queueID }
+            guard item.state == .submitting || item.state == .uncertain else { return false }
+            item.queueID = queueID; item.state = .queued
+            return true
+        }
+    }
+    @discardableResult func markUncertain(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .submitting || item.state == .uncertain || item.state == .queued else { return false }
+            item.state = .uncertain
+            return true
+        }
+    }
+    // The caller must first verify that Codex accepted or consumed the item.
+    @discardableResult func markHandedOff(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .queued || item.state == .uncertain || item.state == .submitting else { return false }
+            item.state = .handedOff
+            return true
+        }
+    }
+    @discardableResult func updateProgress(clientMessageID:String,turnID:String,status:String,excerpt:String?,endedAt:Double?,quotaFailureConfirmed:Bool = false) -> Bool {
+        guard !turnID.isEmpty, ["inProgress","completed","failed","interrupted"].contains(status) else { return false }
+        return change(clientMessageID) { item in
+            guard item.state == .handedOff, item.turnID == nil || item.turnID == turnID else { return false }
+            // A stale reader cannot undo an already confirmed terminal result.
+            if item.turnStatus == "completed" { return status == "completed" }
+            if item.turnStatus == "failed" && item.quotaFailureConfirmed == true { return status == "failed" && quotaFailureConfirmed }
+            item.turnID = turnID; item.turnStatus = status
+            item.excerpt = excerpt.map { String($0.prefix(240)) }
+            item.endedAt = endedAt
+            item.quotaFailureConfirmed = quotaFailureConfirmed && status == "failed" && endedAt.map { $0.isFinite && $0 > 0 && $0 <= Date().timeIntervalSince1970 + 5 } == true && authorizationMode(item.authorizationID) == .continuous
+            return true
+        }
+    }
+    @discardableResult func releaseAfterInspection(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .handedOff, !Self.ownerIsAlive(item.ownerPID) else { return false }
+            item.releasedAfterInspection = true
+            return true
+        }
+    }
+    @discardableResult func claimNotification(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .handedOff, ["completed","failed","interrupted"].contains(item.turnStatus ?? ""),
+                  item.notificationClaimed != true else { return false }
+            item.notificationClaimed = true
+            return true
+        }
+    }
+    // The caller must verify deletion from Codex's queue first.
+    @discardableResult func markCancelled(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.state == .queued else { return false }
+            item.state = .cancelled
+            return true
+        }
+    }
+    // Invoke only for an explicit owner acknowledgement after inspecting Codex.
+    @discardableResult func acknowledgeUncertain(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard (item.state == .uncertain || item.state == .submitting), !Self.ownerIsAlive(item.ownerPID) else { return false }
+            item.ownerPID = nil
+            item.state = .acknowledged
+            return true
+        }
+    }
+    @discardableResult func finishSubmission(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard item.ownerPID == Darwin.getpid() else { return false }
+            item.ownerPID = nil
+            if item.state == .submitting { item.state = .uncertain }
+            return true
+        }
+    }
+    @discardableResult func dismissResolved(clientMessageID:String) -> Bool {
+        change(clientMessageID) { item in
+            guard !item.blocksDispatch, !Self.ownerIsAlive(item.ownerPID) else { return false }
+            item.hidden = true
+            return true
+        }
+    }
+    private func change(_ id:String, update:(inout HandoffRecord)->Bool) -> Bool {
+        guard !storageCorrupted else { return false }
+        return locked(false) {
+            guard reload(convertSubmitting:false), let index = records.firstIndex(where: { $0.clientMessageID == id }) else { return false }
+            let previous = records[index]
+            guard update(&records[index]) else { records[index] = previous; return false }
+            guard persist() else { records[index] = previous; return false }
+            return true
+        }
+    }
+    // The lock is separate from the atomically replaced data file. It protects
+    // both the read and the write when more than one capsule is running.
+    private func locked<T>(_ fallback:T, _ body:()->T) -> T {
+        guard !storageCorrupted else { return fallback }
+        do {
+            try FileManager.default.createDirectory(at:fileURL.deletingLastPathComponent(),withIntermediateDirectories:true,attributes:[.posixPermissions:0o700])
+            let lockPath = fileURL.appendingPathExtension("lock").path
+            let fd = Darwin.open(lockPath,O_CREAT | O_RDWR | O_NOFOLLOW,mode_t(0o600))
+            guard fd >= 0 else { throw NSError(domain:NSPOSIXErrorDomain,code:Int(errno)) }
+            defer { Darwin.close(fd) }
+            guard Darwin.lockf(fd,F_LOCK,0) == 0 else { throw NSError(domain:NSPOSIXErrorDomain,code:Int(errno)) }
+            defer { _ = Darwin.lockf(fd,F_ULOCK,0) }
+            return body()
+        } catch {
+            storageError = error.localizedDescription
+            return fallback
+        }
+    }
+    private func reload(convertSubmitting:Bool) -> Bool {
+        do {
+            do { controls = try JSONDecoder().decode(ResumeControls.self,from:Data(contentsOf:controlsURL)) }
+            catch {
+                let issue = error as NSError
+                guard issue.domain == NSCocoaErrorDomain && issue.code == NSFileReadNoSuchFileError else { throw error }
+                controls = ResumeControls()
+            }
+            let data = try Data(contentsOf:fileURL)
+            records = try JSONDecoder().decode([HandoffRecord].self,from:data)
+            var changed = false
+            if convertSubmitting {
+                for index in records.indices where records[index].state == .submitting && !Self.ownerIsAlive(records[index].ownerPID) {
+                    records[index].state = .uncertain
+                    records[index].ownerPID = nil
+                    changed = true
+                }
+            }
+            return !changed || persist()
+        } catch {
+            let error = error as NSError
+            if error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+                records = []
+                return true
+            }
+            storageError = error.localizedDescription
+            return false
+        }
+    }
+    private func persist() -> Bool {
+        do {
+            try FileManager.default.createDirectory(at:fileURL.deletingLastPathComponent(),withIntermediateDirectories:true,attributes:[.posixPermissions:0o700])
+            let data = try JSONEncoder().encode(records)
+            try data.write(to:fileURL,options:.atomic)
+            try FileManager.default.setAttributes([.posixPermissions:0o600],ofItemAtPath:fileURL.path)
+            let handle = try FileHandle(forWritingTo:fileURL)
+            defer { try? handle.close() }
+            try handle.synchronize()
+            return true
+        } catch {
+            storageError = error.localizedDescription
+            return false
+        }
+    }
+}

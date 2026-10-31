@@ -1,0 +1,7 @@
+# Selected-task auto-resume
+
+The owner explicitly selects Codex conversations in Settings. Selection is off by default and can be removed at any time. The capsule remains 184 × 60 pt; the overview gets a compact entry leading to the settings list.
+
+On each successful quota refresh, the app reads only selected conversations. It waits for an observed exhausted window and a structured quota failure, or a narrowly verified reset transition between nearby polls. Once both quota windows have capacity and the latest turn is unchanged, a cold app-server connection writes a continuation to the persistent native Codex queue and asks the desktop app to wake it. The widget never starts a turn in its independent app-server. A durable, locked handoff ledger records a unique client ID before submission and blocks further handoffs while any outcome is unresolved. The client ID is used only for reconciliation, not as an idempotency key.
+
+The continuation asks Codex to inspect completed actions and files before doing unfinished work. It does not approve tools, use reset cards, replay the original prompt, or auto-resume turns without a structured quota error. The app must be running or relaunched to check the queue; no work happens while the Mac is asleep. Deselecting removes a still-queued message when confirmed; if Codex has taken it, the owner stops it in the original task. Uncertain submissions and failed cancellations stay visible and block new handoffs until reconciled or explicitly acknowledged.
