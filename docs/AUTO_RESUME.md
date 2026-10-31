@@ -1,5 +1,11 @@
 # 自动续跑 / Selected-task auto-resume
 
+## 0.10.1：模式勾选修复
+
+选择任务页的勾选只反映当前模式；切换查看不会修改已有授权。另一个模式已授权的任务会显示其实际模式，再明确勾选将替换原授权，同一任务只有一种有效模式。正在排队或执行时不能直接切换，请先取消排队或核实。快速取消再勾选不会被较晚执行的旧取消操作误撤销。
+
+Picker checkboxes are mode-specific. Browsing does not alter consent; explicitly checking another mode replaces the existing grant. An unrelated mode's unchecked state cannot cancel a task. Pending/running handoffs block mode changes. Rapid reselection preserves the new consent.
+
 ## 0.10.0：单次与持续续跑
 
 每个项目可明确授权「仅续跑一次」（默认）或「持续续跑（不限次数）」。在选择任务页先选模式再勾选，或在已授权任务页的「续跑模式」菜单内明确授权。旧选择不会自动升级，安装与诊断也不会替用户授权。持续授权在重启后保留，直到取消；总暂停与额度保留值对两种模式都有效。

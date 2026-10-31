@@ -5,9 +5,9 @@ import AppKit
     var selectedResumeTasks: [ResumeSelection] {
         resumeLedger.selections.filter { $0.accountID == limits?.accountId }
     }
-    func isAutoResumeSelected(_ id:String) -> Bool {
+    func isAutoResumeSelected(_ id:String,mode:ResumeMode? = nil) -> Bool {
         selectedResumeTasks.contains { item in
-            guard item.threadID == id, item.authorizationVersion == 2, let authorization = item.authorizationID else { return false }
+            guard item.threadID == id, mode == nil || item.effectiveMode == mode, item.authorizationVersion == 2, let authorization = item.authorizationID else { return false }
             let state = handoffLedger.authorizationState(authorization)
             return (state == "active" && item.canAwaitFailure) || (state == "consumed" && handoffLedger.records.contains { $0.authorizationID == authorization && $0.blocksDispatch })
         }
@@ -41,10 +41,27 @@ import AppKit
         if !handoffLedger.setReserve(accountID:account,primary:primary,weekly:weekly) { resumeNotice = L10n.text("续跑记录无法读取，请检查本机存储") }
     }
     func toggleAutoResume(_ thread:ResumeThreadChoice,mode:ResumeMode = .once) {
+        setAutoResumeSelected(thread,selected:!isAutoResumeSelected(thread.id,mode:mode),mode:mode)
+    }
+    func setAutoResumeSelected(_ thread:ResumeThreadChoice,selected:Bool,mode:ResumeMode) {
         guard !demo else { return }
-        if isAutoResumeSelected(thread.id) {
-            removeAutoResume(thread.id)
-        } else if let accountID = limits?.accountId, error == nil {
+        guard resumeLedger.refresh(), handoffLedger.refresh() else {
+            resumeNotice = L10n.text("续跑记录无法读取，请检查本机存储")
+            return
+        }
+        if !selected {
+            // An unchecked row in another mode cannot revoke this task.
+            if isAutoResumeSelected(thread.id,mode:mode) { removeAutoResume(thread.id) }
+            return
+        }
+        guard !isAutoResumeSelected(thread.id,mode:mode), let accountID = limits?.accountId, error == nil else { return }
+        guard !handoffLedger.records.contains(where: { $0.threadID == thread.id && $0.blocksDispatch }) else {
+            resumeNotice = L10n.text("任务正在排队或执行；请先取消或核实后再切换模式。")
+            return
+        }
+        if let item = selectedResumeTasks.first(where: { $0.threadID == thread.id }) {
+            renewResumeAuthorization(item,mode:mode)
+        } else {
             objectWillChange.send()
             resumeLedger.remove(threadID:thread.id)
             resumeLedger.select(threadID:thread.id,accountID:accountID,title:thread.title,mode:mode)
@@ -57,7 +74,10 @@ import AppKit
         _ = handoffLedger.revokeAuthorizations(threadID:id)
         resumeLedger.remove(threadID:id)
         resumeStatuses.removeValue(forKey:id)
-        Task { await cancelResumeSelection(id) }
+        // Cancel captured handoff IDs only. A delayed cancellation must not
+        // revoke a new authorization granted after this synchronous removal.
+        let pending = handoffLedger.records.filter { $0.threadID == id && $0.state.unresolved }
+        Task { for record in pending { await cancelHandoff(record) } }
     }
     func cancelResumeSelection(_ id:String) async {
         objectWillChange.send()

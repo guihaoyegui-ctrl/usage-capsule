@@ -56,6 +56,8 @@
 	<string>任务列表暂无法读取：%@</string>
 	<key>任务已有排队消息，请在 Codex 查看</key>
 	<string>任务已有排队消息，请在 Codex 查看</string>
+	<key>任务正在排队或执行；请先取消或核实后再切换模式。</key>
+	<string>任务正在排队或执行；请先取消或核实后再切换模式。</string>
 	<key>任务状态已变化，请在 Codex 查看</key>
 	<string>任务状态已变化，请在 Codex 查看</string>
 	<key>会员与用量 · 每 %@ 秒检查</key>
@@ -92,6 +94,8 @@
 	<string>勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。</string>
 	<key>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</key>
 	<string>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</string>
+	<key>勾选只显示当前模式；切换查看不改授权，勾选其他模式会替换原授权。</key>
+	<string>勾选只显示当前模式；切换查看不改授权，勾选其他模式会替换原授权。</string>
 	<key>取消</key>
 	<string>取消</string>
 	<key>取消全部授权</key>
@@ -144,6 +148,8 @@
 	<string>已授权一次，等待额度中断</string>
 	<key>已授权任务</key>
 	<string>已授权任务</string>
+	<key>已授权：%@</key>
+	<string>已授权：%@</string>
 	<key>已排队，等待 Codex 处理</key>
 	<string>已排队，等待 Codex 处理</string>
 	<key>已排队，请打开 Codex</key>
@@ -278,6 +284,8 @@
 	<string>本轮遇到错误，后续自动交接已暂停</string>
 	<key>查看 / 固定概览</key>
 	<string>查看 / 固定概览</string>
+	<key>查看与授权的续跑模式</key>
+	<string>查看与授权的续跑模式</string>
 	<key>核实后放行下一项</key>
 	<string>核实后放行下一项</string>
 	<key>概览</key>

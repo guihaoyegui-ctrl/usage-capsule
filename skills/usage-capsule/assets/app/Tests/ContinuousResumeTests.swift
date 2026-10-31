@@ -66,6 +66,40 @@ import Foundation
         _ = HandoffLedger(fileURL:staleFile).revokeAuthorizations(threadID:"thread-a")
         await stale.refresh()
         check(staleRPC.addCount == 0 && staleHandoffs.authorizationState("continuous-auth") == "revoked","a stale widget cannot revive cancelled continuous consent")
+        let choice = ResumeThreadChoice(id:"thread-a",title:"A",folder:"")
+        for (original,target) in [("once",ResumeMode.continuous),("continuous",ResumeMode.once)] {
+            let (m,r,l,h,_,_) = fixture(mode:original)
+            m.limits = try! JSONDecoder().decode(LimitsResponse.self,from:await r.request("account/rateLimits/read",params:[:]))
+            m.toggleAutoResume(choice,mode:target)
+            check(l.selections.count == 1 && l.selections.first?.effectiveMode == target && m.isAutoResumeSelected("thread-a"),"checking a task in the other mode replaces its authorization instead of removing it: \(original)")
+            check(h.authorizationState("continuous-auth") == "revoked","mode replacement revokes the old authorization: \(original)")
+            await Task.yield()
+            check(l.selections.first?.effectiveMode == target && m.isAutoResumeSelected("thread-a"),"mode replacement remains authorized after pending cancellation tasks run: \(original)")
+        }
+        let (filtered,filteredRPC,filteredSelection,_,_,_) = fixture(mode:"once")
+        filtered.limits = try! JSONDecoder().decode(LimitsResponse.self,from:await filteredRPC.request("account/rateLimits/read",params:[:]))
+        let initialID = filteredSelection.selections[0].authorizationID
+        check(filtered.isAutoResumeSelected("thread-a",mode:.once) && !filtered.isAutoResumeSelected("thread-a",mode:.continuous),"a once-only task is checked in once mode and unchecked in continuous mode")
+        filtered.setAutoResumeSelected(choice,selected:false,mode:.continuous)
+        check(filteredSelection.selections[0].authorizationID == initialID && filtered.isAutoResumeSelected("thread-a",mode:.once),"unchecking an unrelated mode cannot cancel the existing authorization")
+        filtered.setAutoResumeSelected(choice,selected:true,mode:.continuous)
+        let changedID = filteredSelection.selections[0].authorizationID
+        filtered.setAutoResumeSelected(choice,selected:true,mode:.continuous)
+        check(filteredSelection.selections.count == 1 && filteredSelection.selections[0].authorizationID == changedID && !filtered.isAutoResumeSelected("thread-a",mode:.once) && filtered.isAutoResumeSelected("thread-a",mode:.continuous),"explicit mode change has one stable continuous consent and removes the once check")
+        filtered.setAutoResumeSelected(choice,selected:false,mode:.continuous)
+        filtered.setAutoResumeSelected(choice,selected:true,mode:.once)
+        try? await Task.sleep(nanoseconds:20_000_000)
+        check(filtered.isAutoResumeSelected("thread-a",mode:.once),"deferred cancellation cannot revoke a newly reselected task")
+        let (inFlight,flightRPC,flightSelection,_,_,_) = fixture(mode:"once")
+        await inFlight.refresh()
+        let queuedID = flightSelection.selections[0].authorizationID
+        inFlight.setAutoResumeSelected(choice,selected:true,mode:.continuous)
+        check(flightRPC.addCount == 1 && flightSelection.selections[0].authorizationID == queuedID && flightSelection.selections[0].effectiveMode == .once && inFlight.resumeNotice != nil,"switching mode while a handoff is unresolved preserves its consent and explains why it is blocked")
+        let (switchedMode,switchedRPC,switchedSelection,switchedHandoffs,_,_) = fixture(mode:"once")
+        switchedRPC.accountID = "account-b"
+        switchedMode.limits = try! JSONDecoder().decode(LimitsResponse.self,from:await switchedRPC.request("account/rateLimits/read",params:[:]))
+        switchedMode.setAutoResumeSelected(choice,selected:true,mode:.continuous)
+        check(switchedSelection.selections.count == 1 && switchedSelection.selections[0].accountID == "account-b" && switchedMode.isAutoResumeSelected("thread-a",mode:.continuous) && switchedHandoffs.authorizationState("continuous-auth") == "revoked","explicit mode selection after an account switch replaces the old-account consent")
         print("Continuous resume: \(failures) failures")
         return failures
     }

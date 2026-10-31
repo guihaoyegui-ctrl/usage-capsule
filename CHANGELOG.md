@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.1 preview — 2026-10-31
+
+- Scope task-picker checkboxes to the displayed recovery mode and show each task's actual authorization mode. Browsing modes never changes consent.
+- Explicitly checking another mode replaces the previous authorization; unchecking another mode cannot revoke it. In-flight handoffs prevent mode changes with an explanation.
+- Preserve explicit reauthorization after account changes instead of retaining an old-account selection.
+- Cancel captured handoff IDs without a deferred task-wide revocation, so rapid deselect/reselect cannot erase newly granted consent.
+
 ## 0.10.0 preview — 2026-10-31
 
 - Add explicit per-task once or continuous quota recovery, with persistent revocation across distinct failures and app restarts.
