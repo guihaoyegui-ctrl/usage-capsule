@@ -1,4 +1,4 @@
-# Validation scope — 0.10.0 preview
+# Validation scope — 0.10.1 preview
 
 Validated locally on an Apple Silicon Mac with Swift 6.4. The project targets macOS 13+; it has not been tested on every supported OS release.
 
@@ -31,3 +31,9 @@ Added profile, service and reset-transition cases for Pro-family weekly-only res
 Simulated native service tests first reproduced the one-shot-only limitation, then verified two distinct quota failures across restart, unique client IDs, repeated-poll deduplication, durable revocation across stale instances and unchanged once-only behavior. Completed, interrupted, unrelated-error and missing-completion-time cases cannot create another recovery. Independent review found non-atomic mode replacement and stale-progress regression of hidden terminal failures; both were reproduced with failing tests before correction. Tests do not authorize real user tasks, generate model turns or consume reset cards. Multiple natural reset cycles remain unverified in a real continuous-mode session.
 
 Final combined suite: 304 PASS checks, zero failures, including native interaction coverage. Both signed variants built successfully. Personal 0.10.0 build 14 was installed with preference preservation and rollback backup; native AX exposed both recovery modes and corrected checkbox states. No real-task authorization or reset-card action was performed by the agent.
+
+## Mode-specific task selection, 2026-10-31
+
+The picker originally reused account-wide selection for both modes; the old toggle removed an existing task when the owner checked it in the other mode. New regression cases first failed, then passed after mode-aware display and explicit selected-value handling. Coverage includes both replacement directions, unrelated-mode unchecking, idempotent selection, quick cancel/reselect, in-flight mode-change blocking and reauthorization after account changes. Independent review caught the last cross-account case and its test was observed failing before the one-line correction.
+
+Final full suite: 316 PASS checks and zero failures, including native interaction coverage. Both signed builds passed. Personal 0.10.1 build 15 was installed preserving task authorizations and preferences. Native AX inspection verified existing continuous tasks unchecked in once mode and checked in continuous mode, with mode labels; browsing preserved the authorization data byte-for-byte. No real task was authorized or cancelled during testing.

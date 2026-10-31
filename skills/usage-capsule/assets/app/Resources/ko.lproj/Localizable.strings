@@ -56,6 +56,8 @@
 	<string>작업 목록을 읽을 수 없습니다: %@</string>
 	<key>任务已有排队消息，请在 Codex 查看</key>
 	<string>작업에 대기 중인 메시지가 있습니다. Codex에서 확인하세요</string>
+	<key>任务正在排队或执行；请先取消或核实后再切换模式。</key>
+	<string>대기 또는 실행 중입니다. 취소하거나 확인한 뒤 모드를 바꾸세요.</string>
 	<key>任务状态已变化，请在 Codex 查看</key>
 	<string>작업 상태가 변경되었습니다. Codex에서 확인하세요</string>
 	<key>会员与用量 · 每 %@ 秒检查</key>
@@ -92,6 +94,8 @@
 	<string>선택 시 해당 모드를 허용합니다. 허용 이후 한도 중단만 재개하며 언제든 취소할 수 있습니다.</string>
 	<key>勾选即授权：下一次因额度中断后恢复一次；不会立即启动，也不会恢复选择前的旧中断。</key>
 	<string>선택하면 이후 한도 초과로 중단될 때 한 번 재개하도록 승인합니다. 즉시 실행하거나 이전 중단을 재개하지 않습니다.</string>
+	<key>勾选只显示当前模式；切换查看不改授权，勾选其他模式会替换原授权。</key>
+	<string>체크는 현재 모드만 표시합니다. 보기 전환은 허용을 바꾸지 않으며 다른 모드에서 체크하면 교체합니다.</string>
 	<key>取消</key>
 	<string>취소</string>
 	<key>取消全部授权</key>
@@ -144,6 +148,8 @@
 	<string>한 번 재개 승인됨 · 모니터링 중</string>
 	<key>已授权任务</key>
 	<string>승인된 작업</string>
+	<key>已授权：%@</key>
+	<string>허용됨: %@</string>
 	<key>已排队，等待 Codex 处理</key>
 	<string>대기열에 추가됨 · Codex 처리 대기 중</string>
 	<key>已排队，请打开 Codex</key>
@@ -278,6 +284,8 @@
 	<string>이번 실행에 오류가 발생했습니다. 후속 자동 전달이 차단되었습니다.</string>
 	<key>查看 / 固定概览</key>
 	<string>개요 표시 / 고정</string>
+	<key>查看与授权的续跑模式</key>
+	<string>표시 및 허용할 재개 모드</string>
 	<key>核实后放行下一项</key>
 	<string>확인 후 다음 허용</string>
 	<key>概览</key>

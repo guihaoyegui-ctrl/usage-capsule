@@ -114,18 +114,21 @@ struct ResumeSettingsView: View {
                 if store.loadingThreads { ProgressView().controlSize(.small) }
                 Button(L10n.text("刷新列表")) { Task { await store.loadRecentThreads() } }.disabled(store.loadingThreads || store.demo)
             }
-            Picker(L10n.text("新增任务的续跑模式"),selection:$selectionMode) {
+            Picker(L10n.text("查看与授权的续跑模式"),selection:$selectionMode) {
                 ForEach(ResumeMode.allCases,id:\.self) { mode in Text(mode.label).tag(mode) }
             }.pickerStyle(.segmented)
-            Text(L10n.text("勾选即授权所选模式；仅接续授权后发生的额度中断，随时取消。"))
+            Text(L10n.text("勾选只显示当前模式；切换查看不改授权，勾选其他模式会替换原授权。"))
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal:false,vertical:true)
             ScrollView {
                 LazyVStack(alignment:.leading,spacing:0) {
                     if store.filteredResumeChoices(search).isEmpty { empty(L10n.text("当前已加载列表中没有匹配任务"),symbol:"magnifyingglass") }
                     ForEach(store.filteredResumeChoices(search)) { thread in
-                        Toggle(isOn:Binding(get:{store.isAutoResumeSelected(thread.id)},set:{_ in store.toggleAutoResume(thread,mode:selectionMode)})) {
+                        Toggle(isOn:Binding(get:{store.isAutoResumeSelected(thread.id,mode:selectionMode)},set:{store.setAutoResumeSelected(thread,selected:$0,mode:selectionMode)})) {
                             VStack(alignment:.leading,spacing:4) {
                                 Text(thread.title).font(.system(size:13)).lineLimit(2).help(thread.title)
+                                if store.isAutoResumeSelected(thread.id), let item = store.selectedResumeTasks.first(where: { $0.threadID == thread.id }) {
+                                    Text(L10n.format("已授权：%@",item.effectiveMode.label)).font(.caption2).foregroundStyle(warm)
+                                }
                                 if !thread.folder.isEmpty { Text(URL(fileURLWithPath:thread.folder).lastPathComponent).font(.caption).foregroundStyle(.secondary).help(thread.folder) }
                             }.padding(.vertical,9)
                         }.toggleStyle(.checkbox).disabled(store.demo || store.limits?.accountId == nil || store.error != nil)

@@ -6,7 +6,7 @@ A tiny native macOS widget for Codex quota, membership, daily Token use and user
 
 ![Usage Capsule and its expanded overview, showing sample data](docs/preview-en.png)
 
-## Features in 0.10.0 preview
+## Features in 0.10.1 preview
 
 ### Quota, membership and daily usage
 
