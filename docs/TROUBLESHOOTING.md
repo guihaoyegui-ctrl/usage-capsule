@@ -38,3 +38,7 @@ Open the confirmation dialog and review the previous request before choosing to 
 ## Reporting an issue
 
 Include macOS version, chip family, app version, CLI version, interface language, and a concise reproduction. Use sample-data screenshots where possible. Remove login data, account/card IDs, local paths, live quota reports, and other private information.
+
+## Long spinner or unresponsive task picker
+
+Use 0.10.2 or newer for the history-response fix. Earlier builds could scan large partial responses repeatedly on the main thread and wait for history before loading choices. Current builds parse replies in the background, coalesce connection initialization and load choices independently. A network/API timeout can still produce an error: retry with Refresh or Refresh list. New authorizations require a verified account; an authentication error must be resolved before granting consent. Existing authorizations are retained during an app update.

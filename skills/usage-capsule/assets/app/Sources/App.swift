@@ -313,7 +313,8 @@ final class TransparentHostingView<Content:View>: NSHostingView<Content> {
         }
         NSApp.activate(ignoringOtherApps:true)
         resumeWindow?.makeKeyAndOrderFront(nil)
-        Task { await store.refresh(); await store.loadRecentThreads() }
+        Task { await store.loadRecentThreads() }
+        Task { await store.refresh() }
     }
     func applicationWillTerminate(_ notification:Notification) {
         terminating = true; motionTask?.cancel(); hideTask?.cancel(); store.stop()

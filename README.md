@@ -6,7 +6,7 @@ A tiny native macOS widget for Codex quota, membership, daily Token use and user
 
 ![Usage Capsule and its expanded overview, showing sample data](docs/preview-en.png)
 
-## Features in 0.10.1 preview
+## Features in 0.10.2 preview
 
 ### Quota, membership and daily usage
 
@@ -29,6 +29,7 @@ A tiny native macOS widget for Codex quota, membership, daily Token use and user
 
 - Select individual Codex conversations; **no task is selected by default**. Choose **Resume once** (default) or **Continuous (unlimited recoveries)** per task. Continuous consent stays active for future quota interruptions until revoked. Selection never immediately starts work or replays pre-selection failures.
 - Continuous mode never loops after ordinary completion, owner input, manual stops or unrelated errors. Each distinct quota failure is handed off at most once. Legacy and spent authorizations no longer appear actively checked.
+- Large streamed history replies are parsed off the UI thread; choices load independently of history checks and confirmed terminal results are reused.
 - Three management tabs for authorized tasks, task selection and history. Search loaded tasks/project folders, load more conversations, inspect full available titles and reorder priority.
 - After recovery, hand one continuation to the original Codex queue. Subsequent automatic handoffs wait for the exact round and final reply to be confirmed ended, or for explicit owner inspection and release.
 - Global pause, per-task revocation, queued-message cancellation and separate five-hour/weekly reserves. Reserves stop new dispatch; they are not hard spending caps on running work.
