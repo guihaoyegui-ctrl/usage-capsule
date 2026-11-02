@@ -235,7 +235,7 @@ import AppKit
             do {
                 if record.state == .handedOff {
                     let confirmed:Bool
-                    if record.turnStatus == "completed" { confirmed = true }
+                    if record.turnStatus == "completed" || record.quotaFailureConfirmed == true { confirmed = true }
                     else { confirmed = try await trackHandoff(record) }
                     if confirmed { resumeTrackingUnavailable.remove(record.id) }
                     else { resumeTrackingUnavailable.insert(record.id) }

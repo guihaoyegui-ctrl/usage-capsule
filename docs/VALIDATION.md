@@ -1,4 +1,4 @@
-# Validation scope — 0.10.1 preview
+# Validation scope — 0.10.2 preview
 
 Validated locally on an Apple Silicon Mac with Swift 6.4. The project targets macOS 13+; it has not been tested on every supported OS release.
 
@@ -37,3 +37,9 @@ Final combined suite: 304 PASS checks, zero failures, including native interacti
 The picker originally reused account-wide selection for both modes; the old toggle removed an existing task when the owner checked it in the other mode. New regression cases first failed, then passed after mode-aware display and explicit selected-value handling. Coverage includes both replacement directions, unrelated-mode unchecking, idempotent selection, quick cancel/reselect, in-flight mode-change blocking and reauthorization after account changes. Independent review caught the last cross-account case and its test was observed failing before the one-line correction.
 
 Final full suite: 316 PASS checks and zero failures, including native interaction coverage. Both signed builds passed. Personal 0.10.1 build 15 was installed preserving task authorizations and preferences. Native AX inspection verified existing continuous tasks unchecked in once mode and checked in continuous mode, with mode labels; browsing preserved the authorization data byte-for-byte. No real task was authorized or cancelled during testing.
+
+## History-response responsiveness, 2026-11-02
+
+A live process sample located the main-thread stall in CodexConnection.receive / Data.firstIndex while consuming history. A fragmented 2 MiB executable-fixture regression reproduced a 206 ms main-actor heartbeat gap and a concurrent initialization disconnect. Background framing reduced the observed synthetic gap to 6–10 ms; this is a regression workload, not a guarantee for every machine. A final-reply/child-EOF race was also reproduced before its FIFO correction.
+
+Stalled-service tests verify quota spinner/lock release, manual refresh and task-list availability while unrelated history is pending, and reuse of confirmed terminal quota outcomes. Final test.sh --ui: 326 PASS checks, zero failures. Both signed variants built. Independent read-only review found no actionable defect. Personal 0.10.2 build 16 was installed with authorization/settings preservation; native UI loaded 13 tasks with enabled checkboxes and mode switching, without changing task consent. Long-running soak across every Codex/server version remains unverified.

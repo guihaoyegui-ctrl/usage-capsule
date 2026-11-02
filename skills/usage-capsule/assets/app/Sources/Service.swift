@@ -53,7 +53,7 @@ extension CodexServing {
 @MainActor final class CodexConnection: CodexServing {
     private var process: Process?
     private var input: Pipe?
-    private var buffer = Data()
+    private var connectingTask:Task<Void,Error>?
     private var counter = 0
     private var pending: [Int: CheckedContinuation<Data, Error>] = [:]
     private var initialized = false
@@ -74,35 +74,56 @@ extension CodexServing {
     }
     func connect() async throws {
         if initialized, process?.isRunning == true { return }
-        disconnect()
+        if let connectingTask { return try await connectingTask.value }
+        let task = Task { @MainActor in try await self.initializeConnection() }
+        connectingTask = task
+        defer { connectingTask = nil }
+        try await task.value
+    }
+    private func initializeConnection() async throws {
+        try Task.checkCancellation()
+        closeTransport()
         guard let binary = Self.executable() else { throw ServiceError(message: L10n.text("未找到 Codex，请先安装或打开 Codex 桌面应用。")) }
         let p = Process(), stdin = Pipe(), stdout = Pipe(), stderr = Pipe()
         p.executableURL = URL(fileURLWithPath: binary); p.arguments = ["app-server", "--stdio"]
         p.standardInput = stdin; p.standardOutput = stdout; p.standardError = stderr
         p.currentDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory())
-        stdout.fileHandleForReading.readabilityHandler = { [weak self] handle in
+        let reader = CodexResponseReader { [weak self, weak p] message in
+            DispatchQueue.main.async { [weak self, weak p] in
+                guard let self, let p, self.process === p else { return }
+                self.receive(message)
+            }
+        }
+        stdout.fileHandleForReading.readabilityHandler = { handle in
             let bytes = handle.availableData
-            if bytes.isEmpty { handle.readabilityHandler = nil; return }
-            Task { @MainActor [weak self] in self?.receive(bytes) }
+            if bytes.isEmpty { handle.readabilityHandler = nil; reader.finish(); return }
+            reader.append(bytes)
         }
         stderr.fileHandleForReading.readabilityHandler = { handle in if handle.availableData.isEmpty { handle.readabilityHandler = nil } }
         p.terminationHandler = { [weak self] child in
             Task { @MainActor [weak self] in
                 guard self?.process === child else { return }
-                self?.failAll(ServiceError(message: L10n.text("Codex 连接已关闭，请重试刷新。"))); self?.initialized = false
+                self?.initialized = false
             }
         }
-        process = p; input = stdin; buffer.removeAll()
+        process = p; input = stdin
         try p.run()
-        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.9.1"], "capabilities": ["experimentalApi":true]])
+        _ = try await request("initialize", params: ["clientInfo": ["name":"usage_capsule", "title":"Usage Capsule", "version":"0.10.2"], "capabilities": ["experimentalApi":true]])
+        try Task.checkCancellation()
         try send(["method":"initialized", "params": [:]])
         initialized = true
     }
     func disconnect() {
+        connectingTask?.cancel()
+        closeTransport()
+    }
+    private func closeTransport() {
         failAll(ServiceError(message: L10n.text("连接已断开"))); initialized = false
         process?.terminationHandler = nil
+        (process?.standardOutput as? Pipe)?.fileHandleForReading.readabilityHandler = nil
+        (process?.standardError as? Pipe)?.fileHandleForReading.readabilityHandler = nil
         if process?.isRunning == true { process?.terminate() }
-        process = nil; input = nil; buffer.removeAll()
+        process = nil; input = nil
     }
     private func failAll(_ error: Error) {
         let waiting = pending; pending.removeAll(); for c in waiting.values { c.resume(throwing:error) }
@@ -124,23 +145,17 @@ extension CodexServing {
             }
         }
     }
-    private func receive(_ data: Data) {
-        guard !data.isEmpty else { return }
-        buffer.append(data)
-        while let newline = buffer.firstIndex(of:10) {
-            let line = buffer.subdata(in:0..<newline); buffer.removeSubrange(0...newline)
-            guard let message = try? JSONSerialization.jsonObject(with:line) as? [String:Any] else { continue }
-            if let id = message["id"] as? Int, let c = pending.removeValue(forKey:id) {
-                if let error = message["error"] as? [String:Any] {
-                    c.resume(throwing:ServiceError(message:error["message"] as? String ?? L10n.text("服务请求失败")))
-                } else if let result = message["result"] {
-                    do { c.resume(returning:try JSONSerialization.data(withJSONObject:result,options:.fragmentsAllowed)) }
-                    catch { c.resume(throwing:error) }
-                } else { c.resume(throwing:ServiceError(message:L10n.text("服务未返回数据"))) }
-            } else if let method = message["method"] as? String {
-                notification?(method,message["params"] as? [String:Any] ?? [:])
-            }
+    private func receive(_ message:CodexResponseReader.Message) {
+        if message.closed {
+            failAll(ServiceError(message:L10n.text("Codex 连接已关闭，请重试刷新。")))
+            initialized = false
+            return
         }
+        if let id = message.id, let continuation = pending.removeValue(forKey:id) {
+            if let error = message.error { continuation.resume(throwing:ServiceError(message:error.isEmpty ? L10n.text("服务请求失败") : error)) }
+            else if let result = message.result { continuation.resume(returning:result) }
+            else { continuation.resume(throwing:ServiceError(message:L10n.text("服务未返回数据"))) }
+        } else if let method = message.method { notification?(method,message.params) }
     }
 }
 
@@ -244,7 +259,11 @@ extension CodexServing {
         Task { await refresh() }
     }
     func refresh(followup:Bool = false) async {
-        guard !refreshing, !redeeming, !demo, !stopped else { return }
+        guard await refreshSnapshot(followup:followup), !stopped else { return }
+        await scanAutoResume()
+    }
+    private func refreshSnapshot(followup:Bool) async -> Bool {
+        guard !refreshing, !redeeming, !demo, !stopped else { return false }
         refreshing = true
         defer {
             refreshing = false
@@ -275,7 +294,7 @@ extension CodexServing {
                 days = recentDays(buckets:usage.dailyUsageBuckets); usageError = nil
                 if !days.contains(where:{$0.date == selectedDay}) { selectedDay = days.last?.date ?? todayKey() }
             } catch { usageError = L10n.format("日用量暂无法读取：%@", String(describing: (error.localizedDescription))) }
-            await scanAutoResume()
+            return true
         } catch {
             verifiedAccountRevision = -1
             resumeLedger.clearQuotaObservation()
@@ -283,6 +302,7 @@ extension CodexServing {
                 limits = nil; days = recentDays(buckets:nil); lastSync = nil; usageError = nil
                 self.error = L10n.text("Codex 登录已过期，请重新登录后刷新。")
             } else { self.error = error.localizedDescription }
+            return false
         }
     }
     func redeem() async {

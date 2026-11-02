@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.2 preview — 2026-11-02
+
+- Parse streamed responses off the main thread, scan only newly arrived bytes, and preserve frame/EOF order so long histories cannot block mouse interaction.
+- Coalesce concurrent app-server connection handshakes instead of disconnecting another reader during initialization.
+- Load task choices independently of quota/history checks; release the quota-refresh indicator before the history scan so manual refresh remains available.
+- Reuse already confirmed terminal quota results instead of repeatedly downloading their full histories. Existing task authorization and dispatch safeguards are unchanged.
+
 ## 0.10.1 preview — 2026-10-31
 
 - Scope task-picker checkboxes to the displayed recovery mode and show each task's actual authorization mode. Browsing modes never changes consent.
